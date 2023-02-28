@@ -90,6 +90,18 @@ export class Backtest {
     return this;
   }
 
+  /**
+   * Plot the equity curve of the backtest run.
+   */
+  public plot() {
+    if (!this._stats) {
+      throw new Error('First issue `backtest.run()` to obtain results');
+    }
+    new Plotting(this._stats).plot();
+
+    return this;
+  }
+
   private * runner(strategy: BaseStrategy) {
     for (let i = 0, context = {}; i < this._data.index.length; i++) {
       const prev = context;
