@@ -78,6 +78,18 @@ export class Backtest {
     return this;
   }
 
+  /**
+   * Print the results of the backtest run.
+   */
+  public print() {
+    if (!this._stats) {
+      throw new Error('First issue `backtest.run()` to obtain results');
+    }
+    this._stats.results?.print();
+
+    return this;
+  }
+
   private * runner(strategy: BaseStrategy) {
     for (let i = 0, context = {}; i < this._data.index.length; i++) {
       const prev = context;
