@@ -5,7 +5,7 @@ import { Broker } from './broker';
 import { Trade } from './trade';
 import { Stats } from './stats';
 import { Plotting } from './plotting';
-import { HistoricalData, BacktestOptions } from './interfaces';
+import { HistoricalData, BacktestOptions, Context } from './interfaces';
 
 export class Backtest {
   private _data: DataFrame;
@@ -63,7 +63,7 @@ export class Backtest {
     const iterator = this.runner(strategy);
     for (const context of iterator) {
       broker.next();
-      strategy.next(context as any);
+      strategy.next(context as Context);
     }
     broker.trades.forEach(t => t.close());
     broker.last();
