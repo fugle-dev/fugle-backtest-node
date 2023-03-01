@@ -14,25 +14,30 @@ export class Backtest {
   private _stats?: Stats;
 
   constructor(data: HistoricalData, Strategy: new(broker: Broker, data: DataFrame) => BaseStrategy, options?: BacktestOptions) {
-    this._data = new DataFrame(data, { index: (Array.isArray(data) ? data.map(d => d.date) : data.date) as string[] });
-    this._data.setIndex({ column: 'date', drop: true, inplace: true });
-    this._data.sortIndex({ ascending: true, inplace: true });
+    this._data = new DataFrame(data);
+
+    if (!(Strategy.prototype instanceof BaseStrategy)) {
+      throw new TypeError('Invalid `Strategy`');
+    }
+
+    if (!this._data.size) {
+      throw new TypeError('The `data` is empty');
+    }
 
     if (!this._data['volume']) {
       this._data.addColumn('volume', Array(this._data.index.length).fill(NaN), { inplace: true });
     }
 
-    if (!this._data.size) {
-      throw new Error('OHLC `data` is empty');
-    }
-
-    if (intersection(this._data.columns, ['open', 'high', 'low', 'close', 'volume']).length !== 5) {
-      throw new Error('`data` must contain `open`, `high`, `low`, `close`, and `volume` (optional)');
+    if (intersection(this._data.columns, ['date', 'open', 'high', 'low', 'close', 'volume']).length !== 6) {
+      throw new TypeError('The `data` must contain `date`, `open`, `high`, `low`, `close`, and `volume` (optional)');
     }
 
     if (this._data['close'].values.some((value: number) => value > (options?.cash || 10000))) {
       console.warn('Some prices are larger than initial cash value.');
     }
+
+    this._data.setIndex({ index: this._data['date'].values, column: 'date', drop: true, inplace: true });
+    this._data.sortIndex({ ascending: true, inplace: true });
 
     this._Strategy = Strategy;
     this._broker = new Broker(this._data, {
