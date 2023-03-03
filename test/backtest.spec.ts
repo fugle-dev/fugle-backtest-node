@@ -1,5 +1,5 @@
 import { Backtest, HistoricalData } from '../src';
-import { Plotting } from '../src/plotting';
+import { Stats } from '../src/stats';
 import { TestStrategy } from './test-strategy';
 
 describe('Backtest', () => {
@@ -55,9 +55,9 @@ describe('Backtest', () => {
     it('should run backtest and generate results', () => {
       const data = require('./fixtures/2330.json');
       const backtest = new Backtest(data, TestStrategy);
-      expect(backtest.results).toBeUndefined();
+      expect(backtest.stats).toBeUndefined();
       expect(backtest.run()).toBeInstanceOf(Backtest);
-      expect(backtest.results).toBeDefined();
+      expect(backtest.stats).toBeDefined();
     });
   });
 
@@ -65,11 +65,9 @@ describe('Backtest', () => {
     it('should print the results of the backtest run', () => {
       const data = require('./fixtures/2330.json');
       const backtest = new Backtest(data, TestStrategy).run();
-      // @ts-ignore
-      backtest._stats.results.print = jest.fn();
+      Stats.prototype.print = jest.fn();
       expect(backtest.print()).toBeInstanceOf(Backtest);
-      // @ts-ignore
-      expect(backtest._stats.results.print).toBeCalled();
+      expect(Stats.prototype.print).toBeCalled();
     });
 
     it('should throw error when missing results', () => {
@@ -85,10 +83,9 @@ describe('Backtest', () => {
     it('should plot the equity curve of the backtest run', () => {
       const data = require('./fixtures/2330.json');
       const backtest = new Backtest(data, TestStrategy).run();
-      Plotting.prototype.plot = jest.fn();
+      Stats.prototype.plot = jest.fn();
       expect(backtest.plot()).toBeInstanceOf(Backtest);
-      // @ts-ignore
-      expect(Plotting.prototype.plot).toBeCalled();
+      expect(Stats.prototype.plot).toBeCalled();
     });
 
     it('should throw error when missing results', () => {
