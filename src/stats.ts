@@ -5,6 +5,7 @@ import { DateTime } from 'luxon';
 import { StatsOptions } from './interfaces';
 import { StatsIndex, EquityCurveColumn, TradeLogColumn } from './enums';
 import { Trade } from './trade';
+import { Plotting } from './plotting';
 
 export class Stats {
   private _equityCurve?: DataFrame;
@@ -155,6 +156,14 @@ export class Stats {
     this._results = results;
 
     return this;
+  }
+
+  public print() {
+    this.results?.print();
+  }
+
+  public plot() {
+    new Plotting(this).plot();
   }
 
   private computeExposureTime(index: string[], tradeLog: DataFrame) {

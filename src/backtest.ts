@@ -4,7 +4,6 @@ import { Strategy as BaseStrategy } from './strategy';
 import { Broker } from './broker';
 import { Trade } from './trade';
 import { Stats } from './stats';
-import { Plotting } from './plotting';
 import { HistoricalData, BacktestOptions, Context } from './interfaces';
 
 export class Backtest {
@@ -51,8 +50,8 @@ export class Backtest {
     });
   }
 
-  get results() {
-    return this._stats?.results;
+  get stats() {
+    return this._stats;
   }
 
   /**
@@ -90,7 +89,7 @@ export class Backtest {
     if (!this._stats) {
       throw new Error('First issue `backtest.run()` to obtain results');
     }
-    this._stats.results?.print();
+    this._stats.print();
 
     return this;
   }
@@ -102,7 +101,7 @@ export class Backtest {
     if (!this._stats) {
       throw new Error('First issue `backtest.run()` to obtain results');
     }
-    new Plotting(this._stats).plot();
+    this._stats.plot();
 
     return this;
   }
