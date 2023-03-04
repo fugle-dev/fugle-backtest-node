@@ -1,18 +1,20 @@
 import { DataFrame, Series, toJSON } from 'danfojs-node';
-import { intersection, mapKeys } from 'lodash';
+import { intersection, mapKeys, maxBy } from 'lodash';
 import { Strategy as BaseStrategy } from './strategy';
 import { Broker } from './broker';
 import { Trade } from './trade';
 import { Stats } from './stats';
 import { HistoricalData, BacktestOptions, Context } from './interfaces';
+import { StatsIndex } from './enums';
 
 export class Backtest {
   private _data: DataFrame;
-  private _Strategy: new(broker: Broker, data: DataFrame) => BaseStrategy;
-  private _broker: Broker;
   private _stats?: Stats;
 
-  constructor(data: HistoricalData, Strategy: new(broker: Broker, data: DataFrame) => BaseStrategy, options?: BacktestOptions) {
+  constructor(data: HistoricalData,
+    private readonly Strategy: new (data: DataFrame, broker: Broker) => BaseStrategy,
+    private readonly options?: BacktestOptions,
+  ) {
     this._data = new DataFrame(data);
 
     if (!(Strategy.prototype instanceof BaseStrategy)) {
@@ -37,17 +39,10 @@ export class Backtest {
 
     this._data.setIndex({ index: this._data['date'].values, column: 'date', drop: true, inplace: true });
     this._data.sortIndex({ ascending: true, inplace: true });
+  }
 
-    this._Strategy = Strategy;
-    this._broker = new Broker(this._data, {
-      cash: 10000,
-      commission: 0,
-      margin: 1,
-      tradeOnClose: false,
-      hedging: false,
-      exclusiveOrders: false,
-      ...options,
-    });
+  get date() {
+    return this._data;
   }
 
   get stats() {
@@ -57,29 +52,44 @@ export class Backtest {
   /**
    * Run the backtest for the strategy.
    */
-  public run() {
-    const data = this._data.copy() as DataFrame;
-    const broker = Object.assign(Object.create(Object.getPrototypeOf(this._broker)), this._broker) as Broker;
-    const strategy = new this._Strategy(broker, data);
+  public async run(params?: Record<string, number>) {
+    const data = this._data;
+    const broker = new Broker(data, {
+      cash: 10000,
+      commission: 0,
+      margin: 1,
+      tradeOnClose: false,
+      hedging: false,
+      exclusiveOrders: false,
+      ...this.options,
+    });
+    const strategy = new this.Strategy(data, broker);
+
+    // @ts-ignore
+    if (params) strategy.params = params;
 
     strategy.init();
 
     const iterator = this.runner(strategy);
-    for (const context of iterator) {
+
+    for await (const context of iterator) {
       broker.next();
       strategy.next(context as Context);
     }
     broker.trades.forEach(t => t.close());
     broker.last();
 
-    this._stats = new Stats(
+    const stats = new Stats(
       data,
+      strategy,
       new Series(broker.equities),
       broker.closedTrades as Trade[],
       { riskFreeRate: 0 },
     ).compute();
 
-    return this;
+    this._stats = stats;
+
+    return stats;
   }
 
   /**
@@ -118,13 +128,13 @@ export class Backtest {
       const indicators = new Map(
         Object
           .keys(strategy.indicators)
-          .map(key => [ key, strategy.indicators[key][i] ])
+          .map(key => [key, strategy.indicators[key][i]])
       );
 
       const signals = new Map(
         Object
           .keys(strategy.signals)
-          .map(key => [ key, strategy.signals[key][i] ])
+          .map(key => [key, strategy.signals[key][i]])
       );
 
       const current = { index, data, indicators, signals };
