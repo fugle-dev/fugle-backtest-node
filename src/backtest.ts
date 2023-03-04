@@ -93,6 +93,43 @@ export class Backtest {
   }
 
   /**
+   * Optimize strategy parameters.
+   */
+  public async optimize(options: { params: Record<string, number[]>, max?: StatsIndex }) {
+    if (!options?.params || !Object.keys(options?.params).length) {
+      throw new Error('Need some strategy parameters to optimize');
+    }
+
+    const paramsCombinations = ((params: Record<string, number[]>): Record<string, number>[] => {
+      const keys = Object.keys(params);
+      const result: Record<string, number>[] = [];
+      const combine = (index: number, current: Record<string, number>) => {
+        if (index === keys.length) {
+          result.push(current);
+          return;
+        }
+        const key = keys[index];
+        const values = params[key];
+        for (let i = 0; i < values.length; i++) {
+          const param = { [key]: values[i] }
+          combine(index + 1, { ...current, ...param });
+        }
+      };
+      combine(0, {});
+      return result;
+    })(options.params);
+
+    const max = options.max || StatsIndex.EquityFinal;
+
+    const stats = await Promise.all(paramsCombinations.map(params => this.run(params)))
+      .then(data => maxBy(data, (stats) => stats.results && stats.results.at(max)))
+
+    this._stats = stats;
+
+    return stats;
+  }
+
+  /**
    * Print the results of the backtest run.
    */
   public print() {

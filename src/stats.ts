@@ -4,6 +4,7 @@ import { uniq, first, last } from 'lodash';
 import { DateTime } from 'luxon';
 import { StatsOptions } from './interfaces';
 import { StatsIndex, EquityCurveColumn, TradeLogColumn } from './enums';
+import { Strategy } from './strategy';
 import { Trade } from './trade';
 import { Plotting } from './plotting';
 
@@ -14,6 +15,7 @@ export class Stats {
 
   constructor(
     private readonly data: DataFrame,
+    private readonly strategy: Strategy,
     private readonly equity: Series,
     private readonly trades: Trade[],
     private readonly options: StatsOptions,
@@ -69,13 +71,10 @@ export class Stats {
     const start = DateTime.fromISO(first(index) as string);
     const end = DateTime.fromISO(last(index) as string);
 
-    const results = new Series([
-      start.toISODate(),
-      end.toISODate(),
-      end.diff(start, 'days').get('days'),
-    ], {
-      index: [StatsIndex.Start, StatsIndex.End, StatsIndex.Duration],
-    });
+    const results = new Series(
+      [ this.strategy.toString(), start.toISODate(), end.toISODate(), end.diff(start, 'days').get('days')],
+      { index: [ StatsIndex.Strategy, StatsIndex.Start, StatsIndex.End, StatsIndex.Duration] },
+    );
 
     const exposureTime = this.computeExposureTime(index, tradeLog);
     const equityFinal = this.equity.iat(index.length - 1) as number;

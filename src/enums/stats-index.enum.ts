@@ -1,4 +1,5 @@
 export enum StatsIndex {
+  Strategy = 'Strategy',
   Start = 'Start',
   End = 'End',
   Duration = 'Duration',
