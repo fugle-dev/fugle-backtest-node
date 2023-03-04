@@ -2,6 +2,10 @@ import { Strategy, Context } from '../src';
 import { SMA, CrossUp, CrossDown } from 'technicalindicators';
 
 export class TestStrategy extends Strategy {
+  params = {
+    period: 60,
+  };
+
   init() {
     const sma60 = SMA.calculate({
       period: 60,

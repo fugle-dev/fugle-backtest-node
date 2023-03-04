@@ -52,19 +52,30 @@ describe('Backtest', () => {
   });
 
   describe('.run()', () => {
-    it('should run backtest and generate results', () => {
+    it('should run backtest and generate stats', async () => {
       const data = require('./fixtures/2330.json');
       const backtest = new Backtest(data, TestStrategy);
       expect(backtest.stats).toBeUndefined();
-      expect(backtest.run()).toBeInstanceOf(Backtest);
+      await backtest.run();
+      expect(backtest.stats).toBeDefined();
+    });
+  });
+
+  describe('.optimize()', () => {
+    it('should optimize strategy parameters', async () => {
+      const data = require('./fixtures/2330.json');
+      const backtest = new Backtest(data, TestStrategy);
+      expect(backtest.stats).toBeUndefined();
+      await backtest.optimize({ params: { period: [5, 20, 60] } });
       expect(backtest.stats).toBeDefined();
     });
   });
 
   describe('.print()', () => {
-    it('should print the results of the backtest run', () => {
+    it('should print the results of the backtest run', async () => {
       const data = require('./fixtures/2330.json');
-      const backtest = new Backtest(data, TestStrategy).run();
+      const backtest = new Backtest(data, TestStrategy);
+      await backtest.run();
       Stats.prototype.print = jest.fn();
       expect(backtest.print()).toBeInstanceOf(Backtest);
       expect(Stats.prototype.print).toBeCalled();
@@ -80,9 +91,10 @@ describe('Backtest', () => {
   });
 
   describe('.plot()', () => {
-    it('should plot the equity curve of the backtest run', () => {
+    it('should plot the equity curve of the backtest run', async () => {
       const data = require('./fixtures/2330.json');
-      const backtest = new Backtest(data, TestStrategy).run();
+      const backtest = new Backtest(data, TestStrategy);
+      await backtest.run();
       Stats.prototype.plot = jest.fn();
       expect(backtest.plot()).toBeInstanceOf(Backtest);
       expect(Stats.prototype.plot).toBeCalled();
