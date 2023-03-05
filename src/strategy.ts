@@ -7,7 +7,7 @@ export abstract class Strategy {
   private _indicators: Record<string, number[] | Record<string, number>[]> = {};
   private _signals: Record<string, boolean[]> = {};
 
-  constructor(protected readonly data: DataFrame, private readonly broker: Broker) {}
+  constructor(public readonly data: DataFrame, private readonly broker: Broker) {}
 
   get equity() {
     return this.broker.equity;

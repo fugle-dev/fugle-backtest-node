@@ -1,5 +1,5 @@
 import { DataFrame, Series, toJSON } from 'danfojs-node';
-import { intersection, mapKeys, maxBy } from 'lodash';
+import { intersection, maxBy } from 'lodash';
 import { Strategy as BaseStrategy } from './strategy';
 import { Broker } from './broker';
 import { Trade } from './trade';
@@ -52,8 +52,8 @@ export class Backtest {
   /**
    * Run the backtest for the strategy.
    */
-  public async run(params?: Record<string, number>) {
-    const data = this._data;
+  public async run(options?: { params?: Record<string, number> }) {
+    const data = this.data;
     const broker = new Broker(data, {
       cash: 10000,
       commission: 0,
@@ -66,7 +66,7 @@ export class Backtest {
     const strategy = new this.Strategy(data, broker);
 
     // @ts-ignore
-    if (params) strategy.params = params;
+    if (options?.params) strategy.params = options.params;
 
     strategy.init();
 
@@ -121,7 +121,7 @@ export class Backtest {
 
     const max = options.max || StatsIndex.EquityFinal;
 
-    const stats = await Promise.all(paramsCombinations.map(params => this.run(params)))
+    const stats = await Promise.all(paramsCombinations.map(params => this.run({ params })))
       .then(data => maxBy(data, (stats) => stats.results && stats.results.at(max)))
 
     this._stats = stats;
@@ -133,10 +133,10 @@ export class Backtest {
    * Print the results of the backtest run.
    */
   public print() {
-    if (!this._stats) {
+    if (!this.stats) {
       throw new Error('First issue `backtest.run()` to obtain results');
     }
-    this._stats.print();
+    this.stats.print();
 
     return this;
   }
@@ -145,23 +145,24 @@ export class Backtest {
    * Plot the equity curve of the backtest run.
    */
   public plot() {
-    if (!this._stats) {
+    if (!this.stats) {
       throw new Error('First issue `backtest.run()` to obtain results');
     }
-    this._stats.plot();
+    this.stats.plot();
 
     return this;
   }
 
   private * runner(strategy: BaseStrategy) {
-    for (let i = 0, context = {}; i < this._data.index.length; i++) {
-      const prev = context;
+    for (let i = 0, context = {}; i < strategy.data.index.length; i++) {
       const index = i;
+      const rows = strategy.data.iloc({ rows: [i] });
 
-      const data = mapKeys(
-        (toJSON(this._data) as Record<string, number>[])[i],
-        (_, key) => key.toLowerCase(),
-      );
+      const data = {
+        date: rows.index[0],
+        ...(toJSON(rows) as Record<string, number>[])[0],
+      };
+
       const indicators = new Map(
         Object
           .keys(strategy.indicators)
@@ -174,6 +175,7 @@ export class Backtest {
           .map(key => [key, strategy.signals[key][i]])
       );
 
+      const prev = context;
       const current = { index, data, indicators, signals };
       context = { ...current, prev };
 
