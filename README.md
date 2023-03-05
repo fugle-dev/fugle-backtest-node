@@ -68,10 +68,11 @@ const backtest = new Backtest(data, TestStrategy, {
   tradeOnClose: true,
 });
 
-backtest
-  .run()    // run the backtest
-  .print()  // print the results
-  .plot();  // plot the equity curve
+backtest.run()        // run the backtest
+  .then(results => {
+    results.print();  // print the results
+    results.plot();   // plot the equity curve
+  });
 ```
 
 Results in:
