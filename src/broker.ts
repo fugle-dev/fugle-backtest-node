@@ -47,7 +47,8 @@ export class Broker {
   }
 
   get lastPrice() {
-    return this.data['close'].values[this._i];
+    const i = (this._i === this.data.index.length) ? this._i - 1 : this._i;
+    return this.data['close'].iat(i);
   }
 
   get equity() {

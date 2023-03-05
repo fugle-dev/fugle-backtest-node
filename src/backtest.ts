@@ -41,7 +41,7 @@ export class Backtest {
     this._data.sortIndex({ ascending: true, inplace: true });
   }
 
-  get date() {
+  get data() {
     return this._data;
   }
 
