@@ -61,7 +61,8 @@ export class Stats {
         [TradeLogColumn.ExitTime]: trade.exitTime,
         [TradeLogColumn.Tag]: trade.tag,
         [TradeLogColumn.Duration]: DateTime.fromISO(trade.exitTime).diff(DateTime.fromISO(trade.entryTime), 'days').get('days'),
-      }))
+      })),
+      { config: { tableMaxRow: this.trades.length } },
     );
 
     const pl = tradeLog[TradeLogColumn.PnL] as Series;
