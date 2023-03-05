@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0-beta.0](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.0-alpha.1...v0.1.0-beta.0) (2023-03-05)
+
+
+### Features
+
+* add optimization method for strategy parameters ([9bb0e65](https://github.com/fugle-dev/fugle-backtest-node/commit/9bb0e65d69e1ceed8d5335779a7d68ccf811fd1f))
+* make running backtests asynchronous ([f2d032d](https://github.com/fugle-dev/fugle-backtest-node/commit/f2d032d513181f36aea5133cc83fe5b8edfa1b8b))
+
+
+### Bug Fixes
+
+* get the last price of the data correctly ([798403d](https://github.com/fugle-dev/fugle-backtest-node/commit/798403dc0fa01fc66b28c89a3cd893f10ad7f5a7))
+
 ## [0.1.0-alpha.1](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.0-alpha.0...v0.1.0-alpha.1) (2023-03-03)
 
 ## 0.1.0-alpha.0 (2023-03-01)
