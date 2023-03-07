@@ -4,15 +4,15 @@
 [![Build Status][action-image]][action-url]
 <!-- [![Coverage Status][codecov-image]][codecov-url] -->
 
-> A trading strategy backtesting library in Node.js based on [Danfo.js](https://github.com/javascriptdata/danfojs) and inspired by [backtesting.py](https://github.com/kernc/backtesting.py).
+> 一個基於 [Danfo.js](https://github.com/javascriptdata/danfojs) 的 Node.js 交易策略回測工具，靈感來自於 [backtesting.py](https://github.com/kernc/backtesting.py)。
 
-## Installation
+## 安裝
 
 ```sh
 $ npm install --save @fugle/backtest
 ```
 
-## Importing
+## 匯入模組
 
 ```js
 // Using Node.js `require()`
@@ -22,10 +22,9 @@ const { Backtest, Strategy } = require('@fugle/backtest');
 import { Backtest, Strategy } from '@fugle/backtest';
 ```
 
-## Quick Start
+## 快速開始
 
-The following example use [technicalindicators](https://github.com/anandanand84/technicalindicators) to calculate the indicators and signals, but you can replace it with any library.
-
+以下範例使用 [technicalindicators](https://github.com/anandanand84/technicalindicators) 來計算指標和信號，但您可以使用任何函式庫進行替換。
 
 ```js
 import { Backtest, Strategy } from '@fugle/backtest';
@@ -75,7 +74,7 @@ backtest.run()        // run the backtest
   });
 ```
 
-Results in:
+回測結果：
 
 ```
 ╔════════════════════════╤════════════╗
@@ -138,13 +137,13 @@ Results in:
 ![](./assets/equity-curve.png)
 ![](./assets/list-of-trades.png)
 
-## Usage
+## 使用方式
 
-To perform backtesting, you need to prepare historical data, implement a trading strategy, and then run a backtest on that strategy to obtain the results.
+為了進行回測，您需要準備歷史數據，並且編寫交易策略，再對該策略進行回測以獲得結果。
 
-### Preparing historical data
+### 準備歷史數據
 
-First, prepare the historical OHLCV (Open, High, Low, Close, Volume) data of any financial instrument (such as stocks, futures, forex, cryptocurrencies, etc.). The input historical data will be converted to Danfo.js [DataFrame](https://danfo.jsdata.org/api-reference/dataframe), and the data format can be either `Array<Candle>` or `CandleList` type as follows:
+首先，請準備任意金融商品（如：股票、期貨、外匯、加密貨幣等）的 OHLCV（開盤價、最高價、最低價、收盤價、成交量）歷史數據。輸入的歷史資料將會轉換為 Danfo.js [DataFrame](https://danfo.jsdata.org/api-reference/dataframe) 格式，資料格式可以是以下 `Array<Candle>` 或 `CandleList` 類型：
 
 ```ts
 interface Candle {
@@ -168,14 +167,14 @@ interface CandleList {
 type HistoricalData = Array<Candle> | CandleList;
 ```
 
-### Implementing trading strategy
+### 實作交易策略
 
-You can implement your own trading strategy by inheriting the `Strategy` class and overriding its two abstract methods:
+您可以依照自己的想法編寫交易策略。實作交易策略需要繼承 `Strategy` 類別並覆寫其兩個抽象方法：
 
-- `Strategy.init(data)`: This method is called before running the strategy. You can pre-calculate all indicators and signals that the strategy depends on.
-- `Strategy.next(context)`: This method will be iteratively called when running the strategy with the `Backtest` instance, and the `context` parameter represents the current candle and technical indicators and signals. You can decide whether to make buy or sell actions based on the current price, indicators, and signals.
+- `Strategy.init()`：該方法在運行策略之前被調用，您可以預先計算策略所依賴的所有指標和信號。
+- `Strategy.next(context)`：該方法將在 `Backtest` 實例運行策略時迭代調用， `context` 參數代表當前的 K 棒以及技術指標和信號。您可以依據當前價格、指標和信號決定是否作出買賣動作。
 
-Here's an example of implementing a simple moving average (SMA) strategy. The strategy sets the SMA parameter period to 20 by default, and when the closing price of a stock or commodity crosses above the moving average, it buys 1 trading unit. Conversely, when the closing price crosses below the moving average, it sells 1 trading unit.
+以下是一個實現簡單移動平均線策略的例子。該策略將均線參數 `period` 預設為 `20`，當股票或商品的收盤價格向上穿越均線時買進 1 交易單位。相反地，當收盤價格向下穿越均線時，該策略會賣出 1 交易單位。
 
 ```js
 import { Backtest, Strategy } from '@fugle/backtest';
@@ -184,7 +183,7 @@ import { SMA, CrossUp, CrossDown } from 'technicalindicators';
 class SmaStrategy extends Strategy {
   params = { period: 20 };
 
-  init(data) {
+  init() {
     const sma = SMA.calculate({
       period: this.params.period,
       values: this.data['close'].values,
@@ -206,16 +205,18 @@ class SmaStrategy extends Strategy {
 
   next(ctx) {
     const { index, signals } = ctx;
-    if (index < this.params.period) return;
-    if (signals.get('CrossUp')) this.buy({ size: 1000 });
+    if (index === 0) this.buy({ size: 1000 });
+    if (index < 60) return;
     if (signals.get('CrossDown')) this.sell({ size: 1000 });
+    if (signals.get('CrossUp')) this.buy({ size: 1000 });
   }
 }
 ```
 
-### Running the backtest
+### 運行回溯測試
 
-After preparing historical data and implementing the trading strategy, you can run the backtest. Calling the `Backtest.run()` method will execute the backtest and return a `Stats` instance, which includes the simulation results of our strategy and related statistical data.
+準備好歷史數據並實作交易策略後，就可以運行回溯測試。調用 `Backtest.run()` 方法會執行回溯測試並回傳 `Stats` 物件，其中包含我們策略的模擬結果和相關的統計數據。
+
 
 ```js
 const backtest = new Backtest(data, SmaStrategy, {
@@ -230,9 +231,9 @@ backtest.run()        // run the backtest
   });
 ```
 
-### Optimizing the parameters
+### 最佳化參數
 
-In the above strategy, we provided a variable parameter `params.period`, which represents the period of the moving average. We can optimize this parameter, or find the best combination of multiple parameters, by calling the `Backtest.optimize()` method. Setting the `params` option in this method can change the parameter settings provided by the `Strategy`, and `Backtest.optimize()` will return the best combination of parameters provided.
+在上述策略中，我們提供的一個可變參數 `params.period`，代表移動平均線的期間。我們可以透過調用 `Backtest.optimize()` 方法來優化這個參數，或找出多個參數的最佳組合。在該方法下設置 `params` 選項可以改變 `Strategy` 提供參數的設定，`Backtest.optimize()` 將會回傳提供參數下的最佳組合。
 
 ```js
 backtest.optimize({
@@ -246,11 +247,11 @@ backtest.optimize({
   });
 ```
 
-## Documentation
+## 文件
 
-See [`/doc/fugle-backtest.md`](./doc/fugle-backtest.md) for Node.js-like documentation of `@fugle/backtest` classes.
+關於 `@fugle/backtest` 用法的詳細說明，請至 [`/doc/fugle-backtest-zh-TW.md`](./doc/fugle-backtest-zh-TW.md) 查閱。
 
-## License
+## 授權
 
 [MIT](LICENSE)
 
