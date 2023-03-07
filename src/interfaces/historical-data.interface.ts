@@ -1,5 +1,5 @@
 export interface Candle {
-  date: Date | string;
+  date: string;
   open: number;
   high: number;
   low: number;
@@ -8,7 +8,7 @@ export interface Candle {
 }
 
 export interface CandleList {
-  date: Date[] | string[];
+  date: string[];
   open: number[];
   high: number[];
   low: number[];
