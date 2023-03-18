@@ -46,14 +46,14 @@ export abstract class Strategy {
   /**
    * Implement the strategy decisions.
    */
-  abstract next(ctx: Context): void;
+  abstract next(context: Context): void;
 
   /**
    * Place a new long order.
    */
-  protected buy(options: Omit<OrderOptions, 'trade'>) {
+  public buy(options: Omit<OrderOptions, 'trade'>) {
     assert(
-      ((options.size > 0 && options.size < 1 ) || Math.round(options.size) === options.size),
+      (options.size > 0) && (options.size < 1 || Math.round(options.size) === options.size),
       'size must be a positive fraction of equity, or a positive whole number of units',
     );
     return this.broker.newOrder(options);
@@ -62,20 +62,20 @@ export abstract class Strategy {
   /**
    * Place a new short order.
    */
-  protected sell(options: Omit<OrderOptions, 'trade'>) {
+  public sell(options: Omit<OrderOptions, 'trade'>) {
     assert(
-      ((options.size > 0 && options.size < 1 ) || Math.round(options.size) === options.size),
+      (options.size > 0) && (options.size < 1 || Math.round(options.size) === options.size),
       'size must be a positive fraction of equity, or a positive whole number of units',
     );
     return this.broker.newOrder({ ...options, size: -options.size });
   }
 
   /**
-   * Add a indicator.
+   * Add an indicator.
    */
-  protected addIndicator(name: string, values: number[] | Record<string, number>[]) {
+  public addIndicator(name: string, values: number[] | Record<string, number>[]) {
     if (values.length < this.data.index.length) {
-      values = new Array(this.data.index.length - values.length).fill(null).concat(values);
+      values = Array(this.data.index.length - values.length).fill(null).concat(values);
     }
     this._indicators[name] = values;
   }
@@ -83,16 +83,16 @@ export abstract class Strategy {
   /**
    * Get the indicator.
    */
-  protected getIndicator(name: string) {
+  public getIndicator(name: string) {
     return this._indicators[name];
   }
 
   /**
-   * Add the indicator.
+   * Add a signal.
    */
-  protected addSignal(name: string, values: boolean[]) {
+  public addSignal(name: string, values: boolean[]) {
     if (values.length < this.data.index.length) {
-      values = new Array(this.data.index.length - values.length).fill(null).concat(values);
+      values = Array(this.data.index.length - values.length).fill(null).concat(values);
     }
     this._signals[name] = values;
   }
@@ -100,7 +100,7 @@ export abstract class Strategy {
   /**
    * Get the signal.
    */
-  protected getSignal(name: string) {
+  public getSignal(name: string) {
     return this._signals[name];
   }
 
@@ -113,7 +113,7 @@ export abstract class Strategy {
       // @ts-ignore
       const params = Object.entries(this.params)
         .map(([key, value]) => `${key}=${value}`);
-      return `${this.constructor.name}(${params.join(', ')})`
+      return `${this.constructor.name}(${params.join(',')})`
     }
     return this.constructor.name;
   }
