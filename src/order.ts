@@ -117,10 +117,12 @@ export class Order {
     remove(this.broker.orders, o => o === this);
     const trade = this.parentTrade;
     if (trade?.slOrder === this) {
-      trade.replace({ slOrder: undefined });
+      // @ts-ignore
+      delete trade._slOrder;
     }
     if (trade?.tpOrder === this) {
-      trade.replace({ tpOrder: undefined });
+      // @ts-ignore
+      delete trade._tpOrder;
     }
   }
 
