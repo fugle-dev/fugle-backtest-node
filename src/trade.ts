@@ -209,7 +209,7 @@ export class Trade {
     const order = (type === 'sl') ? this._slOrder : this._tpOrder;
     if (order) order.cancel();
     if (price) {
-      const options = (type === 'sl') ? { stop: price } : { limit: price };
+      const options = (type === 'sl') ? { stopPrice: price } : { limitPrice: price };
       const order = this.broker.newOrder({ size: -this.size, parentTrade: this, tag: this.tag, ...options });
       if (type === 'sl') this._slOrder = order;
       if (type === 'tp') this._tpOrder = order;
