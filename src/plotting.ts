@@ -10,9 +10,9 @@ export class Plotting {
   private readonly openBrowser: boolean;
   private readonly filename: string;
 
-  constructor(private readonly stats: Stats, options?: PlottingOptions) {
-    this.openBrowser = options?.openBrowser || true;
-    this.filename = options?.filename || 'output.html';
+  constructor(private readonly stats: Stats, private readonly options?: PlottingOptions) {
+    this.openBrowser = options?.openBrowser ?? true;
+    this.filename = options?.filename ?? 'output.html';
   }
 
   public plot() {
@@ -34,6 +34,7 @@ export class Plotting {
   private createHTML() {
     assert(this.stats.results);
     assert(this.stats.equityCurve);
+    assert(this.stats.tradeLog);
 
     const df = this.stats.equityCurve.addColumn('Date', this.stats.equityCurve.index) as DataFrame;
     const equityCurve = JSON.stringify(toJSON(df));
