@@ -96,6 +96,7 @@ export class Backtest {
    * Optimize strategy parameters.
    */
   public async optimize(options: { params: Record<string, number[]>, max?: StatsIndex }) {
+    /* istanbul ignore next */
     if (!options?.params || !Object.keys(options?.params).length) {
       throw new Error('Need some strategy parameters to optimize');
     }
