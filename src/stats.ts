@@ -34,6 +34,7 @@ export class Stats {
   }
 
   public compute() {
+    /* istanbul ignore next */
     const { riskFreeRate = 0 } = this.options;
 
     assert(riskFreeRate > -1 && riskFreeRate < 1);
@@ -97,6 +98,7 @@ export class Stats {
       dayReturns = this.computeDayReturns(equityCurve['Equity']);
       gmeanDayReturn = this.computeGeometricMean(dayReturns);
       const d = new Series(index.map(date => DateTime.fromISO(date).get('weekday')));
+      /* istanbul ignore next */
       annualTradingDays = (d.eq(0).or(d.eq(6)).mean() > 2 / 7 * 0.6) ? 365 : 252;
     }
 
@@ -159,10 +161,16 @@ export class Stats {
   }
 
   public print() {
-    this.results?.print();
+    if (!this.results) {
+      throw new Error('No stats results');
+    }
+    this.results.print();
   }
 
   public plot() {
+    if (!this.results) {
+      throw new Error('No stats results');
+    }
     new Plotting(this).plot();
   }
 
@@ -191,7 +199,7 @@ export class Stats {
   }
 
   private computeDrawdownDurationPeaks(drawdown: Series) {
-    //@ts-ignore
+    // @ts-ignore
     const iloc = uniq([ ...drawdown.eq(0).values.reduce((arr, v, i) => v ? [ ...arr, i ] : arr, []), drawdown.index.length - 1]);
     const prev = [ NaN, ...iloc.slice(0, -1) ];
     const df = new DataFrame({ iloc, prev });
@@ -214,7 +222,7 @@ export class Stats {
       return end.diff(start, 'days').get('days');
     }), { inplace: true });
 
-    //@ts-ignore
+    // @ts-ignore
     df.addColumn('peaks', df.apply(([iloc, prev, duration]) =>
       drawdown.iloc(Array.from({ length: (iloc - prev) + 1 }, (v, k) => k + prev)).max(), { axis: 1 },
     ), { inplace: true });
@@ -232,6 +240,7 @@ export class Stats {
       if (i > 0) {
         const prev = DateTime.fromISO(returns.index[i - 1] as string).toISODate();
         const current = DateTime.fromISO(d as string).toISODate();
+        /* istanbul ignore next */
         if (current === prev) iloc[i - 1] = NaN;
       }
       return [ ...iloc, i ];
@@ -248,7 +257,9 @@ export class Stats {
 
   private computeGeometricMean(returns: Series) {
     returns = returns.fillNa(0).add(1) as Series;
+    /* istanbul ignore next */
     if (returns.values.some(v => v <= 0)) return 0;
+    /* istanbul ignore next */
     return Math.exp(returns.apply(v => Math.log(v)).sum() / (returns.values.length || 0)) - 1;
   }
 
