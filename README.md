@@ -2,7 +2,7 @@
 
 [![NPM version][npm-image]][npm-url]
 [![Build Status][action-image]][action-url]
-<!-- [![Coverage Status][codecov-image]][codecov-url] -->
+[![Coverage Status][codecov-image]][codecov-url]
 
 > A trading strategy backtesting library in Node.js based on [Danfo.js](https://github.com/javascriptdata/danfojs) and inspired by [backtesting.py](https://github.com/kernc/backtesting.py).
 
@@ -31,33 +31,40 @@ The following example use [technicalindicators](https://github.com/anandanand84/
 import { Backtest, Strategy } from '@fugle/backtest';
 import { SMA, CrossUp, CrossDown } from 'technicalindicators';
 
-class TestStrategy extends Strategy {
+class SmaCross extends Strategy {
+  params = { n1: 20, n2: 60 };
+
   init() {
-    const sma60 = SMA.calculate({
-      period: 60,
+    const lineA = SMA.calculate({
+      period: this.params.n1,
       values: this.data['close'].values,
     });
-    this.addIndicator('SMA60', sma60);
+    this.addIndicator('lineA', lineA);
+
+    const lineB = SMA.calculate({
+      period: this.params.n2,
+      values: this.data['close'].values,
+    });
+    this.addIndicator('lineB', lineB);
 
     const crossUp = CrossUp.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA60'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossUp', crossUp);
+    this.addSignal('crossUp', crossUp);
 
     const crossDown = CrossDown.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA60'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossDown', crossDown);
+    this.addSignal('crossDown', crossDown);
   }
 
   next(ctx) {
     const { index, signals } = ctx;
-    if (index === 0) this.buy({ size: 1000 });
-    if (index < 60) return;
-    if (signals.get('CrossDown')) this.sell({ size: 1000 });
-    if (signals.get('CrossUp')) this.buy({ size: 1000 });
+    if (index < this.params.n1 || index < this.params.n2) return;
+    if (signals.get('crossUp')) this.buy({ size: 1000 });
+    if (signals.get('crossDown')) this.sell({ size: 1000 });
   }
 }
 
@@ -78,61 +85,63 @@ backtest.run()        // run the backtest
 Results in:
 
 ```
-╔════════════════════════╤════════════╗
-║ Start                  │ 2020-01-02 ║
-╟────────────────────────┼────────────╢
-║ End                    │ 2022-12-30 ║
-╟────────────────────────┼────────────╢
-║ Duration               │ 1093       ║
-╟────────────────────────┼────────────╢
-║ Exposure Time [%]      │ 99.863946  ║
-╟────────────────────────┼────────────╢
-║ Equity Final [$]       │ 1216000    ║
-╟────────────────────────┼────────────╢
-║ Equity Peak [$]        │ 1682500    ║
-╟────────────────────────┼────────────╢
-║ Return [%]             │ 21.6       ║
-╟────────────────────────┼────────────╢
-║ Buy & Hold Return [%]  │ 32.300885  ║
-╟────────────────────────┼────────────╢
-║ Return (Ann.) [%]      │ 6.935051   ║
-╟────────────────────────┼────────────╢
-║ Volatility (Ann.) [%]  │ 17.450299  ║
-╟────────────────────────┼────────────╢
-║ Sharpe Ratio           │ 0.397417   ║
-╟────────────────────────┼────────────╢
-║ Sortino Ratio          │ 0.660789   ║
-╟────────────────────────┼────────────╢
-║ Calmar Ratio           │ 0.215082   ║
-╟────────────────────────┼────────────╢
-║ Max. Drawdown [%]      │ -32.243685 ║
-╟────────────────────────┼────────────╢
-║ Avg. Drawdown [%]      │ -4.486974  ║
-╟────────────────────────┼────────────╢
-║ Max. Drawdown Duration │ 708        ║
-╟────────────────────────┼────────────╢
-║ Avg. Drawdown Duration │ 66         ║
-╟────────────────────────┼────────────╢
-║ # Trades               │ 32         ║
-╟────────────────────────┼────────────╢
-║ Win Rate [%]           │ 18.75      ║
-╟────────────────────────┼────────────╢
-║ Best Trade [%]         │ 95.9184    ║
-╟────────────────────────┼────────────╢
-║ Worst Trade [%]        │ -10.3245   ║
-╟────────────────────────┼────────────╢
-║ Avg. Trade [%]         │ 1.847315   ║
-╟────────────────────────┼────────────╢
-║ Max. Trade Duration    │ 308        ║
-╟────────────────────────┼────────────╢
-║ Avg. Trade Duration    │ 53         ║
-╟────────────────────────┼────────────╢
-║ Profit Factor          │ 2.293327   ║
-╟────────────────────────┼────────────╢
-║ Expectancy [%]         │ 3.230916   ║
-╟────────────────────────┼────────────╢
-║ SQN                    │ 0.579594   ║
-╚════════════════════════╧════════════╝
+╔════════════════════════╤═══════════════════════╗
+║ Strategy               │ SmaCross(n1=20,n2=60) ║
+╟────────────────────────┼───────────────────────╢
+║ Start                  │ 2020-01-02            ║
+╟────────────────────────┼───────────────────────╢
+║ End                    │ 2022-12-30            ║
+╟────────────────────────┼───────────────────────╢
+║ Duration               │ 1093                  ║
+╟────────────────────────┼───────────────────────╢
+║ Exposure Time [%]      │ 55.102041             ║
+╟────────────────────────┼───────────────────────╢
+║ Equity Final [$]       │ 1105000               ║
+╟────────────────────────┼───────────────────────╢
+║ Equity Peak [$]        │ 1378000               ║
+╟────────────────────────┼───────────────────────╢
+║ Return [%]             │ 10.5                  ║
+╟────────────────────────┼───────────────────────╢
+║ Buy & Hold Return [%]  │ 32.300885             ║
+╟────────────────────────┼───────────────────────╢
+║ Return (Ann.) [%]      │ 3.482537              ║
+╟────────────────────────┼───────────────────────╢
+║ Volatility (Ann.) [%]  │ 8.204114              ║
+╟────────────────────────┼───────────────────────╢
+║ Sharpe Ratio           │ 0.424487              ║
+╟────────────────────────┼───────────────────────╢
+║ Sortino Ratio          │ 0.660431              ║
+╟────────────────────────┼───────────────────────╢
+║ Calmar Ratio           │ 0.175785              ║
+╟────────────────────────┼───────────────────────╢
+║ Max. Drawdown [%]      │ -19.811321            ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Drawdown [%]      │ -2.241326             ║
+╟────────────────────────┼───────────────────────╢
+║ Max. Drawdown Duration │ 708                   ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Drawdown Duration │ 54                    ║
+╟────────────────────────┼───────────────────────╢
+║ # Trades               │ 6                     ║
+╟────────────────────────┼───────────────────────╢
+║ Win Rate [%]           │ 16.666667             ║
+╟────────────────────────┼───────────────────────╢
+║ Best Trade [%]         │ 102.3729              ║
+╟────────────────────────┼───────────────────────╢
+║ Worst Trade [%]        │ -10.4418              ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Trade [%]         │ 5.718878              ║
+╟────────────────────────┼───────────────────────╢
+║ Max. Trade Duration    │ 322                   ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Trade Duration    │ 100                   ║
+╟────────────────────────┼───────────────────────╢
+║ Profit Factor          │ 2.880822              ║
+╟────────────────────────┼───────────────────────╢
+║ Expectancy [%]         │ 11.139483             ║
+╟────────────────────────┼───────────────────────╢
+║ SQN                    │ 0.305807              ║
+╚════════════════════════╧═══════════════════════╝
 ```
 
 ![](./assets/equity-curve.png)
@@ -181,34 +190,40 @@ Here's an example of implementing a simple moving average (SMA) strategy. The st
 import { Backtest, Strategy } from '@fugle/backtest';
 import { SMA, CrossUp, CrossDown } from 'technicalindicators';
 
-class SmaStrategy extends Strategy {
-  params = { period: 20 };
+class SmaCross extends Strategy {
+  params = { n1: 20, n2: 60 };
 
-  init(data) {
-    const sma = SMA.calculate({
-      period: this.params.period,
+  init() {
+    const lineA = SMA.calculate({
+      period: this.params.n1,
       values: this.data['close'].values,
     });
-    this.addIndicator('SMA', sma);
+    this.addIndicator('lineA', lineA);
+
+    const lineB = SMA.calculate({
+      period: this.params.n2,
+      values: this.data['close'].values,
+    });
+    this.addIndicator('lineB', lineB);
 
     const crossUp = CrossUp.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossUp', crossUp);
+    this.addSignal('crossUp', crossUp);
 
     const crossDown = CrossDown.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossDown', crossDown);
+    this.addSignal('crossDown', crossDown);
   }
 
   next(ctx) {
     const { index, signals } = ctx;
-    if (index < this.params.period) return;
-    if (signals.get('CrossUp')) this.buy({ size: 1000 });
-    if (signals.get('CrossDown')) this.sell({ size: 1000 });
+    if (index < this.params.n1 || index < this.params.n2) return;
+    if (signals.get('crossUp')) this.buy({ size: 1000 });
+    if (signals.get('crossDown')) this.sell({ size: 1000 });
   }
 }
 ```
@@ -232,12 +247,13 @@ backtest.run()        // run the backtest
 
 ### Optimizing the parameters
 
-In the above strategy, we provided a variable parameter `params.period`, which represents the period of the moving average. We can optimize this parameter, or find the best combination of multiple parameters, by calling the `Backtest.optimize()` method. Setting the `params` option in this method can change the parameter settings provided by the `Strategy`, and `Backtest.optimize()` will return the best combination of parameters provided.
+In the above strategy, we provide two variable parameters `params.n1` and `params.n2`, which represent the period of two moving averages. We can optimize the parameters and find the best combination of multiple parameters by calling the `Backtest.optimize()` method. Setting the `params` option in this method can change the parameter settings provided by the `Strategy`, and `Backtest.optimize()` will return the best combination of parameters provided.
 
 ```js
 backtest.optimize({
   params: {
-    period: [5, 10, 20, 60],
+    n1: [5, 10, 20],
+    n2: [60, 120, 240],
   },
 })
   .then(results => {
@@ -258,5 +274,5 @@ See [`/doc/fugle-backtest.md`](./doc/fugle-backtest.md) for Node.js-like documen
 [npm-url]: https://npmjs.com/package/@fugle/backtest
 [action-image]: https://img.shields.io/github/actions/workflow/status/fugle-dev/fugle-backtest-node/node.js.yml?branch=master
 [action-url]: https://github.com/fugle-dev/fugle-backtest-node/actions/workflows/node.js.yml
-<!-- [codecov-image]: https://img.shields.io/codecov/c/github/fugle-dev/fugle-backtest-node.svg
-[codecov-url]: https://codecov.io/gh/fugle-dev/fugle-backtest-node -->
+[codecov-image]: https://img.shields.io/codecov/c/github/fugle-dev/fugle-backtest-node.svg
+[codecov-url]: https://codecov.io/gh/fugle-dev/fugle-backtest-node

@@ -2,7 +2,7 @@
 
 [![NPM version][npm-image]][npm-url]
 [![Build Status][action-image]][action-url]
-<!-- [![Coverage Status][codecov-image]][codecov-url] -->
+[![Coverage Status][codecov-image]][codecov-url]
 
 > 一個基於 [Danfo.js](https://github.com/javascriptdata/danfojs) 的 Node.js 交易策略回測工具，靈感來自於 [backtesting.py](https://github.com/kernc/backtesting.py)。
 
@@ -30,33 +30,40 @@ import { Backtest, Strategy } from '@fugle/backtest';
 import { Backtest, Strategy } from '@fugle/backtest';
 import { SMA, CrossUp, CrossDown } from 'technicalindicators';
 
-class TestStrategy extends Strategy {
+class SmaCross extends Strategy {
+  params = { n1: 20, n2: 60 };
+
   init() {
-    const sma60 = SMA.calculate({
-      period: 60,
+    const lineA = SMA.calculate({
+      period: this.params.n1,
       values: this.data['close'].values,
     });
-    this.addIndicator('SMA60', sma60);
+    this.addIndicator('lineA', lineA);
+
+    const lineB = SMA.calculate({
+      period: this.params.n2,
+      values: this.data['close'].values,
+    });
+    this.addIndicator('lineB', lineB);
 
     const crossUp = CrossUp.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA60'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossUp', crossUp);
+    this.addSignal('crossUp', crossUp);
 
     const crossDown = CrossDown.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA60'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossDown', crossDown);
+    this.addSignal('crossDown', crossDown);
   }
 
   next(ctx) {
     const { index, signals } = ctx;
-    if (index === 0) this.buy({ size: 1000 });
-    if (index < 60) return;
-    if (signals.get('CrossDown')) this.sell({ size: 1000 });
-    if (signals.get('CrossUp')) this.buy({ size: 1000 });
+    if (index < this.params.n1 || index < this.params.n2) return;
+    if (signals.get('crossUp')) this.buy({ size: 1000 });
+    if (signals.get('crossDown')) this.sell({ size: 1000 });
   }
 }
 
@@ -77,61 +84,63 @@ backtest.run()        // run the backtest
 回測結果：
 
 ```
-╔════════════════════════╤════════════╗
-║ Start                  │ 2020-01-02 ║
-╟────────────────────────┼────────────╢
-║ End                    │ 2022-12-30 ║
-╟────────────────────────┼────────────╢
-║ Duration               │ 1093       ║
-╟────────────────────────┼────────────╢
-║ Exposure Time [%]      │ 99.863946  ║
-╟────────────────────────┼────────────╢
-║ Equity Final [$]       │ 1216000    ║
-╟────────────────────────┼────────────╢
-║ Equity Peak [$]        │ 1682500    ║
-╟────────────────────────┼────────────╢
-║ Return [%]             │ 21.6       ║
-╟────────────────────────┼────────────╢
-║ Buy & Hold Return [%]  │ 32.300885  ║
-╟────────────────────────┼────────────╢
-║ Return (Ann.) [%]      │ 6.935051   ║
-╟────────────────────────┼────────────╢
-║ Volatility (Ann.) [%]  │ 17.450299  ║
-╟────────────────────────┼────────────╢
-║ Sharpe Ratio           │ 0.397417   ║
-╟────────────────────────┼────────────╢
-║ Sortino Ratio          │ 0.660789   ║
-╟────────────────────────┼────────────╢
-║ Calmar Ratio           │ 0.215082   ║
-╟────────────────────────┼────────────╢
-║ Max. Drawdown [%]      │ -32.243685 ║
-╟────────────────────────┼────────────╢
-║ Avg. Drawdown [%]      │ -4.486974  ║
-╟────────────────────────┼────────────╢
-║ Max. Drawdown Duration │ 708        ║
-╟────────────────────────┼────────────╢
-║ Avg. Drawdown Duration │ 66         ║
-╟────────────────────────┼────────────╢
-║ # Trades               │ 32         ║
-╟────────────────────────┼────────────╢
-║ Win Rate [%]           │ 18.75      ║
-╟────────────────────────┼────────────╢
-║ Best Trade [%]         │ 95.9184    ║
-╟────────────────────────┼────────────╢
-║ Worst Trade [%]        │ -10.3245   ║
-╟────────────────────────┼────────────╢
-║ Avg. Trade [%]         │ 1.847315   ║
-╟────────────────────────┼────────────╢
-║ Max. Trade Duration    │ 308        ║
-╟────────────────────────┼────────────╢
-║ Avg. Trade Duration    │ 53         ║
-╟────────────────────────┼────────────╢
-║ Profit Factor          │ 2.293327   ║
-╟────────────────────────┼────────────╢
-║ Expectancy [%]         │ 3.230916   ║
-╟────────────────────────┼────────────╢
-║ SQN                    │ 0.579594   ║
-╚════════════════════════╧════════════╝
+╔════════════════════════╤═══════════════════════╗
+║ Strategy               │ SmaCross(n1=20,n2=60) ║
+╟────────────────────────┼───────────────────────╢
+║ Start                  │ 2020-01-02            ║
+╟────────────────────────┼───────────────────────╢
+║ End                    │ 2022-12-30            ║
+╟────────────────────────┼───────────────────────╢
+║ Duration               │ 1093                  ║
+╟────────────────────────┼───────────────────────╢
+║ Exposure Time [%]      │ 55.102041             ║
+╟────────────────────────┼───────────────────────╢
+║ Equity Final [$]       │ 1105000               ║
+╟────────────────────────┼───────────────────────╢
+║ Equity Peak [$]        │ 1378000               ║
+╟────────────────────────┼───────────────────────╢
+║ Return [%]             │ 10.5                  ║
+╟────────────────────────┼───────────────────────╢
+║ Buy & Hold Return [%]  │ 32.300885             ║
+╟────────────────────────┼───────────────────────╢
+║ Return (Ann.) [%]      │ 3.482537              ║
+╟────────────────────────┼───────────────────────╢
+║ Volatility (Ann.) [%]  │ 8.204114              ║
+╟────────────────────────┼───────────────────────╢
+║ Sharpe Ratio           │ 0.424487              ║
+╟────────────────────────┼───────────────────────╢
+║ Sortino Ratio          │ 0.660431              ║
+╟────────────────────────┼───────────────────────╢
+║ Calmar Ratio           │ 0.175785              ║
+╟────────────────────────┼───────────────────────╢
+║ Max. Drawdown [%]      │ -19.811321            ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Drawdown [%]      │ -2.241326             ║
+╟────────────────────────┼───────────────────────╢
+║ Max. Drawdown Duration │ 708                   ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Drawdown Duration │ 54                    ║
+╟────────────────────────┼───────────────────────╢
+║ # Trades               │ 6                     ║
+╟────────────────────────┼───────────────────────╢
+║ Win Rate [%]           │ 16.666667             ║
+╟────────────────────────┼───────────────────────╢
+║ Best Trade [%]         │ 102.3729              ║
+╟────────────────────────┼───────────────────────╢
+║ Worst Trade [%]        │ -10.4418              ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Trade [%]         │ 5.718878              ║
+╟────────────────────────┼───────────────────────╢
+║ Max. Trade Duration    │ 322                   ║
+╟────────────────────────┼───────────────────────╢
+║ Avg. Trade Duration    │ 100                   ║
+╟────────────────────────┼───────────────────────╢
+║ Profit Factor          │ 2.880822              ║
+╟────────────────────────┼───────────────────────╢
+║ Expectancy [%]         │ 11.139483             ║
+╟────────────────────────┼───────────────────────╢
+║ SQN                    │ 0.305807              ║
+╚════════════════════════╧═══════════════════════╝
 ```
 
 ![](./assets/equity-curve.png)
@@ -233,12 +242,13 @@ backtest.run()        // run the backtest
 
 ### 最佳化參數
 
-在上述策略中，我們提供的一個可變參數 `params.period`，代表移動平均線的期間。我們可以透過調用 `Backtest.optimize()` 方法來優化這個參數，或找出多個參數的最佳組合。在該方法下設置 `params` 選項可以改變 `Strategy` 提供參數的設定，`Backtest.optimize()` 將會回傳提供參數下的最佳組合。
+在上述策略中，我們提供的兩個可變參數 `params.n1` 與 `params.n2`，代表兩條移動平均線的期間。我們可以透過調用 `Backtest.optimize()` 方法來最佳化參數，並找出多個參數的最佳組合。在該方法下設置 `params` 選項可以改變 `Strategy` 提供參數的設定，`Backtest.optimize()` 將會回傳提供參數下的最佳組合。
 
 ```js
 backtest.optimize({
   params: {
-    period: [5, 10, 20, 60],
+    n1: [5, 10, 20],
+    n2: [60, 120, 240],
   },
 })
   .then(results => {
@@ -259,5 +269,5 @@ backtest.optimize({
 [npm-url]: https://npmjs.com/package/@fugle/backtest
 [action-image]: https://img.shields.io/github/actions/workflow/status/fugle-dev/fugle-backtest-node/node.js.yml?branch=master
 [action-url]: https://github.com/fugle-dev/fugle-backtest-node/actions/workflows/node.js.yml
-<!-- [codecov-image]: https://img.shields.io/codecov/c/github/fugle-dev/fugle-backtest-node.svg
-[codecov-url]: https://codecov.io/gh/fugle-dev/fugle-backtest-node -->
+[codecov-image]: https://img.shields.io/codecov/c/github/fugle-dev/fugle-backtest-node.svg
+[codecov-url]: https://codecov.io/gh/fugle-dev/fugle-backtest-node
