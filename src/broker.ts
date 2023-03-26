@@ -170,8 +170,7 @@ export class Broker {
         if ([trade.slOrder, trade.tpOrder].includes(order)) {
           assert(order.size === -trade.size);
           assert(!this.orders.includes(order));
-        }
-        else {
+        } else {
           assert(Math.abs(size) <= Math.abs(prevSize) && Math.abs(size) >= 1);
           remove(this.orders, o => o === order);
         }
@@ -194,7 +193,7 @@ export class Broker {
 
       if (!this._hedging) {
         for (const trade of this.trades) {
-          if (trade.isLong == order.isLong) continue;
+          if (trade.isLong === order.isLong) continue;
           assert(trade.size * order.size < 0);
 
           if (Math.abs(needSize) >= Math.abs(trade.size)) {
