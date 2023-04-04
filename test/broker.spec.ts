@@ -152,7 +152,7 @@ describe('Broker', () => {
   });
 
   describe('.newOrder()', () => {
-    it('should throw an error if long order do not meet range limits', () => {
+    it('should throw error if long order do not meet range limits', () => {
       const options = {
         cash: 10000,
         commission: 0,
@@ -170,7 +170,7 @@ describe('Broker', () => {
       })).toThrowError();
     });
 
-    it('should throw an error if short order do not meet range limits', () => {
+    it('should throw error if short order do not meet range limits', () => {
       const options = {
         cash: 10000,
         commission: 0,
@@ -198,7 +198,7 @@ describe('Broker', () => {
         exclusiveOrders: false,
       };
       const broker = new Broker(data, options);
-      const trade = new Trade(broker, { size: 1, entryPrice: 100, entryBar: 1 });
+      const trade = new Trade(broker, { size: 10, entryPrice: 100, entryBar: 1 });
       broker.newOrder({ size: -100, parentTrade: trade });
       expect(broker.orders.length).toBe(1);
       expect(broker.orders[0].parentTrade).toBe(trade);
@@ -328,7 +328,47 @@ describe('Broker', () => {
       expect(broker.trades.length).toBe(1);
     });
 
-    it('should ignore an order if size is 0', () => {
+    it('should execute a stop-loss order', () => {
+      const options = {
+        cash: 10000,
+        commission: 0,
+        margin: 1,
+        tradeOnClose: false,
+        hedging: false,
+        exclusiveOrders: false,
+      };
+      const broker = new Broker(data, options);
+      const trade = new Trade(broker, { size: -10, entryPrice: 100, entryBar: 0 });
+      trade.sl = 110;
+      broker.trades = [trade];
+      expect(broker.trades.length).toBe(1);
+      expect(broker.closedTrades.length).toBe(0);
+      broker.next();
+      expect(broker.trades.length).toBe(0);
+      expect(broker.closedTrades.length).toBe(1);
+    });
+
+    it('should execute a take-profit order', () => {
+      const options = {
+        cash: 10000,
+        commission: 0,
+        margin: 1,
+        tradeOnClose: false,
+        hedging: false,
+        exclusiveOrders: false,
+      };
+      const broker = new Broker(data, options);
+      const trade = new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 });
+      trade.tp = 110;
+      broker.trades = [trade];
+      expect(broker.trades.length).toBe(1);
+      expect(broker.closedTrades.length).toBe(0);
+      broker.next();
+      expect(broker.trades.length).toBe(0);
+      expect(broker.closedTrades.length).toBe(1);
+    });
+
+    it('should ignore the order if the size is 0', () => {
       const options = {
         cash: 10000,
         commission: 0,

@@ -1,8 +1,8 @@
 import { sum, sumBy } from 'lodash';
 import { DataFrame } from 'danfojs-node';
 import { Broker } from '../src/broker';
-import { Trade } from '../src/trade';
 import { Position } from '../src/position';
+import { Trade } from '../src/trade';
 
 describe('Position', () => {
   let data: DataFrame;
@@ -21,7 +21,7 @@ describe('Position', () => {
   });
 
   describe('constructor()', () => {
-    it('should create a new position', () => {
+    it('should create a Position instance', () => {
       const position = new Position(broker);
       expect(position).toBeInstanceOf(Position);
     });
@@ -29,7 +29,9 @@ describe('Position', () => {
 
   describe('.size', () => {
     it('should return the sum of trade sizes', () => {
-      broker.trades = [new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       expect(position.size).toBe(sumBy(broker.trades, trade => trade.size));
     });
@@ -37,7 +39,9 @@ describe('Position', () => {
 
   describe('.pl', () => {
     it('should return the sum of trade profits and losses', () => {
-      broker.trades = [new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       expect(position.pl).toBe(sumBy(broker.trades, trade => trade.pl));
     });
@@ -45,7 +49,9 @@ describe('Position', () => {
 
   describe('.plPct', () => {
     it('should return the weighted average of trade profit percentages', () => {
-      broker.trades = [new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       const sizes = broker.trades.map(trade => Math.abs(trade.size));
       const weights = sizes.map(size => size / sum(sizes));
@@ -56,13 +62,17 @@ describe('Position', () => {
 
   describe('.isLong', () => {
     it('should return true if position size is positive', () => {
-      broker.trades = [new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       expect(position.isLong).toBe(true);
     });
 
     it('should return false if position size is negative', () => {
-      broker.trades = [new Trade(broker, { size: -10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: -10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       expect(position.isLong).toBe(false);
     });
@@ -70,13 +80,17 @@ describe('Position', () => {
 
   describe('.isShort', () => {
     it('should return true if position size is negative', () => {
-      broker.trades = [new Trade(broker, { size: -10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: -10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       expect(position.isShort).toBe(true);
     });
 
     it('should return false if position size is positive', () => {
-      broker.trades = [new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 })];
+      broker.trades = [
+        new Trade(broker, { size: 10, entryPrice: 100, entryBar: 0 }),
+      ];
       const position = new Position(broker);
       expect(position.isShort).toBe(false);
     });

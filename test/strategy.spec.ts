@@ -10,6 +10,7 @@ describe('Strategy', () => {
 
   beforeEach(() => {
     data = new DataFrame(require('./fixtures/2330.json'));
+    data.setIndex({ index: data['date'].values, column: 'date', drop: true, inplace: true });
     broker = new Broker(data, {
       cash: 10000,
       commission: 0,

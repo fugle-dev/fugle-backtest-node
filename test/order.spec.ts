@@ -20,7 +20,7 @@ describe('Order', () => {
   });
 
   describe('constructor()', () => {
-    it('should create a new order', () => {
+    it('should create an Order instance', () => {
       const options = { size: 1 };
       const order = new Order(broker, options);
       expect(order).toBeInstanceOf(Order);
@@ -33,7 +33,7 @@ describe('Order', () => {
   });
 
   describe('.size', () => {
-    it('should get the size', () => {
+    it('should get the size of the order', () => {
       const options = { size: 1 };
       const order = new Order(broker, options);
       expect(order.size).toBe(options.size);
@@ -41,7 +41,7 @@ describe('Order', () => {
   });
 
   describe('.limit', () => {
-    it('should get the limit price', () => {
+    it('should get the limit price of the order', () => {
       const options = { size: 1, limitPrice: 100 };
       const order = new Order(broker, options);
       expect(order.limit).toBe(options.limitPrice);
@@ -49,7 +49,7 @@ describe('Order', () => {
   });
 
   describe('.stop', () => {
-    it('should get the stop price', () => {
+    it('should get the stop price of the order', () => {
       const options = { size: 1, stopPrice: 100 };
       const order = new Order(broker, options);
       expect(order.stop).toBe(options.stopPrice);
@@ -57,7 +57,7 @@ describe('Order', () => {
   });
 
   describe('.sl', () => {
-    it('should get the stop loss price', () => {
+    it('should get the stop-loss price of the order', () => {
       const options = { size: 1, slPrice: 100 };
       const order = new Order(broker, options);
       expect(order.sl).toBe(options.slPrice);
@@ -65,7 +65,7 @@ describe('Order', () => {
   });
 
   describe('.tp', () => {
-    it('should get the take profit price', () => {
+    it('should get the take-profit price of the order', () => {
       const options = { size: 1, tpPrice: 100 };
       const order = new Order(broker, options);
       expect(order.tp).toBe(options.tpPrice);
@@ -73,19 +73,31 @@ describe('Order', () => {
   });
 
   describe('.parentTrade', () => {
-    it('should get the parent trade', () => {
+    it('should get the parent trade of the order', () => {
       const trade = new Trade(broker, { size: 1, entryPrice: 100, entryBar: 1 });
       const options = { size: 1, parentTrade: trade };
       const order = new Order(broker, options);
       expect(order.parentTrade).toBe(options.parentTrade);
     });
+
+    it('should return undefined if parent trade is not set', () => {
+      const options = { size: 1 };
+      const order = new Order(broker, options);
+      expect(order.parentTrade).toBeUndefined();
+    });
   });
 
   describe('.tag', () => {
-    it('should get the tag', () => {
+    it('should get the tag of the order if set', () => {
       const options = { size: 1, tag: { key: 'value' } };
       const order = new Order(broker, options);
-      expect(order.tag).toBe(options.tag)
+      expect(order.tag).toBe(options.tag);
+    });
+
+    it('should return undefined if tag is not set', () => {
+      const options = { size: 1 };
+      const order = new Order(broker, options);
+      expect(order.tag).toBeUndefined();
     });
   });
 
@@ -136,11 +148,11 @@ describe('Order', () => {
     it('should remove the order from the broker', () => {
       broker.newOrder({ size: 1 });
       expect(broker.orders[0]).toBeInstanceOf(Order);
-      broker.orders[0].cancel()
+      broker.orders[0].cancel();
       expect(broker.orders[0]).toBeUndefined();
     });
 
-    it('should remove the parent trade SL order', () => {
+    it('should remove the stop-loss order of the parent trade', () => {
       const trade = new Trade(broker, { size: 1, entryPrice: 100, entryBar: 1 });
       expect(trade.slOrder).toBeUndefined();
       trade.sl = 100;
@@ -149,7 +161,7 @@ describe('Order', () => {
       expect(trade.slOrder).toBeUndefined();
     });
 
-    it('should remove the parent trade TP order', () => {
+    it('should remove the take-profit order of the parent trade', () => {
       const trade = new Trade(broker, { size: 1, entryPrice: 100, entryBar: 1 });
       expect(trade.slOrder).toBeUndefined();
       trade.tp = 100;
@@ -210,8 +222,7 @@ describe('Order', () => {
       const order = new Order(broker, options);
       const trade = new Trade(broker, { size: 1, entryPrice: 100, entryBar: 1 });
       const newOptions = { ...options, parentTrade: trade };
-      // @ts-ignore
-      expect(order.parantTrade).toBe(options.parentTrade);
+      expect(order.parentTrade).toBe(options.parantTrade);
       order.replace(newOptions);
       expect(order.parentTrade).toBe(newOptions.parentTrade);
     });

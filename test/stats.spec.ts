@@ -3,8 +3,8 @@ import { Broker } from '../src/broker';
 import { Strategy } from '../src/strategy';
 import { Stats } from '../src/stats';
 import { Plotting } from '../src/plotting';
-import { SmaCross } from './sma-cross.strategy';
 import { Trade } from '../src/trade';
+import { SmaCross } from './sma-cross.strategy';
 
 describe('Stats', () => {
   let data: DataFrame;
@@ -31,7 +31,7 @@ describe('Stats', () => {
   });
 
   describe('constructor()', () => {
-    it('should create a new stats', () => {
+    it('should create a Stats instance', () => {
       const stats = new Stats(data, strategy, equity, trades, { riskFreeRate: 0 });
       expect(stats).toBeInstanceOf(Stats);
     });
@@ -54,8 +54,7 @@ describe('Stats', () => {
     it('should print the results', () => {
       const stats = new Stats(data, strategy, equity, trades, { riskFreeRate: 0 });
       stats.compute();
-      // @ts-ignore
-      stats.results.print = jest.fn();
+      Series.prototype.print = jest.fn();;
       stats.print();
       expect(stats.results?.print).toBeCalled();
     });

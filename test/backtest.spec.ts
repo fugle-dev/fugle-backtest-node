@@ -14,12 +14,12 @@ describe('Backtest', () => {
       jest.clearAllMocks();
     });
 
-    it('should create Backtest instance', () => {
+    it('should create a Backtest instance', () => {
       const backtest = new Backtest(data, SmaCross);
       expect(backtest).toBeInstanceOf(Backtest);
     });
 
-    it('should create Backtest instance with options', () => {
+    it('should create a Backtest instance with options', () => {
       const backtest = new Backtest(data, SmaCross, { cash: 1000000 });
       expect(backtest).toBeInstanceOf(Backtest);
     });

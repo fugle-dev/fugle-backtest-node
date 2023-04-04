@@ -37,7 +37,7 @@ describe('Plotting', () => {
       expect(plotting['filename']).toBe('output.html');
     });
 
-    it('should set provided options if any', () => {
+    it('should set provided options', () => {
       const options = { openBrowser: false, filename: 'test.html' };
       const plotting = new Plotting(stats, options);
       expect(plotting).toBeInstanceOf(Plotting);

@@ -1,7 +1,7 @@
 import { DataFrame } from 'danfojs-node';
-import { Trade } from '../src/trade';
 import { Broker } from '../src/broker';
 import { Order } from '../src/order';
+import { Trade } from '../src/trade';
 
 describe('Trade', () => {
   let data: DataFrame;
@@ -20,7 +20,7 @@ describe('Trade', () => {
   });
 
   describe('constructor()', () => {
-    it('should create a new trade', () => {
+    it('should create a Trade instance', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const order = new Trade(broker, options);
       expect(order).toBeInstanceOf(Trade);
@@ -69,7 +69,7 @@ describe('Trade', () => {
     it('should get the index of the exit bar if set', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0, exitPrice: 110, exitBar: 1 };
       const trade = new Trade(broker, options);
-      expect(trade.exitBar).toBe(1);
+      expect(trade.exitBar).toBe(options.exitBar);
     });
 
     it('should get undefined if exit price is not set', () => {
@@ -94,14 +94,16 @@ describe('Trade', () => {
   });
 
   describe('.slOrder', () => {
-    it('should get the stop loss order of the trade if set', () => {
-      const order = new Order(broker, { size: -10 });
-      const options = { size: 10, entryPrice: 100, entryBar: 0, slOrder: order };
+    it('should get the stop-loss order of the trade if set', () => {
+      const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
-      expect(trade.slOrder).toBe(order);
+      trade.sl = 90;
+      expect(trade.slOrder).toBeInstanceOf(Order);
+      expect(trade.slOrder?.size).toBe(-10);
+      expect(trade.slOrder?.stop).toBe(90);
     });
 
-    it('should return undefined if stop loss order is not set', () => {
+    it('should return undefined if stop-loss order is not set', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
       expect(trade.slOrder).toBeUndefined();
@@ -109,14 +111,16 @@ describe('Trade', () => {
   });
 
   describe('.tpOrder', () => {
-    it('should get the take profit order of the trade if set', () => {
-      const order = new Order(broker, { size: -10 });
-      const options = { size: 10, entryPrice: 100, entryBar: 0, tpOrder: order };
+    it('should get the take-profit order of the trade if set', () => {
+      const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
-      expect(trade.tpOrder).toBe(order);
+      trade.tp = 110;
+      expect(trade.tpOrder).toBeInstanceOf(Order);
+      expect(trade.tpOrder?.size).toBe(-10);
+      expect(trade.tpOrder?.limit).toBe(110);
     });
 
-    it('should return undefined if take profit order is not set', () => {
+    it('should return undefined if take-profit order is not set', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
       expect(trade.tpOrder).toBeUndefined();
@@ -138,7 +142,7 @@ describe('Trade', () => {
       expect(trade.exitTime).toBe(broker.index[options.exitBar]);
     });
 
-    it('should return undefined if take profit order is not set', () => {
+    it('should return undefined if take-profit order is not set', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
       expect(trade.exitTime).toBeUndefined();
@@ -222,7 +226,7 @@ describe('Trade', () => {
   });
 
   describe('.sl', () => {
-    it('should get the stop loss price of the trade if set', () => {
+    it('should get the stop-loss price of the trade if set', () => {
       const order = new Order(broker, { size: -10, stopPrice: 95 });
       const options = { size: 10, entryPrice: 100, entryBar: 0, slOrder: order };
       const trade = new Trade(broker, options);
@@ -233,7 +237,7 @@ describe('Trade', () => {
       expect(trade.sl).toBe(stopPrice);
     });
 
-    it('should return undefined if stop loss price is not set', () => {
+    it('should return undefined if stop-loss price is not set', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
       expect(trade.sl).toBeUndefined();
@@ -241,7 +245,7 @@ describe('Trade', () => {
   });
 
   describe('.tp', () => {
-    it('should get the take profit price of the trade if set', () => {
+    it('should get the take-profit price of the trade if set', () => {
       const order = new Order(broker, { size: -10, limitPrice: 105 });
       const options = { size: 10, entryPrice: 100, entryBar: 0, tpOrder: order };
       const trade = new Trade(broker, options);
@@ -252,7 +256,7 @@ describe('Trade', () => {
       expect(trade.tp).toBe(limitPrice);
     });
 
-    it('should return undefined if take profit price is not set', () => {
+    it('should return undefined if take-profit price is not set', () => {
       const options = { size: 10, entryPrice: 100, entryBar: 0 };
       const trade = new Trade(broker, options);
       expect(trade.tp).toBeUndefined();
