@@ -116,14 +116,10 @@ export class Order {
   public cancel() {
     remove(this.broker.orders, o => o === this);
     const trade = this.parentTrade;
-    if (trade?.slOrder === this) {
-      // @ts-ignore
-      delete trade._slOrder;
-    }
-    if (trade?.tpOrder === this) {
-      // @ts-ignore
-      delete trade._tpOrder;
-    }
+    // @ts-ignore
+    if (trade?.slOrder === this) delete trade._slOrder;
+    // @ts-ignore
+    if (trade?.tpOrder === this) delete trade._tpOrder;
   }
 
   /**
