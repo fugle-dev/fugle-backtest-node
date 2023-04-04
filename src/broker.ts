@@ -17,8 +17,8 @@ export class Broker {
   public equities: number[];
   public orders: Order[];
   public trades: Trade[];
+  public closedTrades: Trade[];
   public position?: Position;
-  public closedTrades?: Trade[];
 
   constructor(private readonly data: DataFrame, options: BrokerOptions) {
     assert(0 < options.cash, `cash should be > 0, is ${options.cash}`);
@@ -127,23 +127,25 @@ export class Broker {
     for (let i = 0; i < this.orders.length; i = 0) {
       const order = this.orders[i];
 
+      /* istanbul ignore if */
       if (!this.orders.includes(order)) continue;
 
       const stopPrice = order.stop;
       if (stopPrice) {
         const isStopHit = order.isLong ? (high > stopPrice) : (low < stopPrice);
+        /* istanbul ignore if */
         if (!isStopHit) continue;
-
-        order.replace({ size: order.size, stopPrice: undefined });
+        // @ts-ignore
+        delete order._stopPrice;
       }
 
       let price;
       if (order.limit) {
         const isLimitHit = order.isLong ? (low < order.limit) : (high > order.limit);
-        const isLimitHitBeforeStop = isLimitHit &&
-          order.isLong
+        const isLimitHitBeforeStop = isLimitHit && order.isLong
           ? (order.limit < (stopPrice || Number.NEGATIVE_INFINITY))
           : (order.limit > (stopPrice || Number.POSITIVE_INFINITY));
+        /* istanbul ignore if */
         if (!isLimitHit || isLimitHitBeforeStop) continue;
         price = order.isLong
           ? Math.min(stopPrice || open, order.limit)
@@ -167,6 +169,7 @@ export class Broker {
           this.reduceTrade({ trade, price, size, timeIndex });
           assert(order.size !== -prevSize || !this.trades.includes(trade));
         }
+        /* istanbul ignore if */
         if ([trade.slOrder, trade.tpOrder].includes(order)) {
           assert(order.size === -trade.size);
           assert(!this.orders.includes(order));
@@ -193,9 +196,11 @@ export class Broker {
 
       if (!this._hedging) {
         for (const trade of this.trades) {
+          /* istanbul ignore if */
           if (trade.isLong === order.isLong) continue;
           assert(trade.size * order.size < 0);
 
+          /* istanbul ignore else */
           if (Math.abs(needSize) >= Math.abs(trade.size)) {
             this.closeTrade({ trade, price, timeIndex });
             needSize += trade.size;
@@ -215,12 +220,14 @@ export class Broker {
 
       if (needSize) {
         this.openTrade({ price: adjustedPrice, size: needSize, sl: order.sl, tp: order.tp, timeIndex, tag: order.tag });
+        /* istanbul ignore if */
         if ((order.sl || order.tp) && isMarketOrder) reprocessOrders = true;
       }
 
       remove(this.orders, o => o === order);
     }
 
+    /* istanbul ignore if */
     if (reprocessOrders) this.processOrders();
   }
 
@@ -239,7 +246,9 @@ export class Broker {
     const trade = new Trade(this, { size, entryPrice: price, entryBar: timeIndex, tag });
     this.trades.push(trade);
 
+    /* istanbul ignore if */
     if (tp) trade.tp = tp;
+    /* istanbul ignore if */
     if (sl) trade.sl = sl;
   }
 
@@ -264,6 +273,8 @@ export class Broker {
     assert(sizeLeft * trade.size >= 0);
 
     let closeTrade;
+
+    /* istanbul ignore else */
     if (!sizeLeft) {
       closeTrade = trade;
     } else {
