@@ -69,7 +69,7 @@ class SmaCross extends Strategy {
 
 const data = require('./data.json');  // historical OHLCV data
 
-const backtest = new Backtest(data, TestStrategy, {
+const backtest = new Backtest(data, SmaCross, {
   cash: 1000000,
   tradeOnClose: true,
 });
@@ -183,41 +183,47 @@ type HistoricalData = Array<Candle> | CandleList;
 - `Strategy.init()`：該方法在運行策略之前被調用，您可以預先計算策略所依賴的所有指標和信號。
 - `Strategy.next(context)`：該方法將在 `Backtest` 實例運行策略時迭代調用， `context` 參數代表當前的 K 棒以及技術指標和信號。您可以依據當前價格、指標和信號決定是否作出買賣動作。
 
-以下是一個實現簡單移動平均線策略的例子。該策略將均線參數 `period` 預設為 `20`，當股票或商品的收盤價格向上穿越均線時買進 1 交易單位。相反地，當收盤價格向下穿越均線時，該策略會賣出 1 交易單位。
+以下是一個實現移動平均雙線交叉的例子。參數 `n1` 表示短天期移動平均線的週期；`n2` 表示長天期移動平均線的週期。當短天期均線向上穿越長天期均線時，買進 `1000` 交易單位。相反地，當短天期均線向下穿越長天期均線時，該策略會賣出 `1000` 交易單位。
+
 
 ```js
 import { Backtest, Strategy } from '@fugle/backtest';
 import { SMA, CrossUp, CrossDown } from 'technicalindicators';
 
-class SmaStrategy extends Strategy {
-  params = { period: 20 };
+class SmaCross extends Strategy {
+  params = { n1: 20, n2: 60 };
 
   init() {
-    const sma = SMA.calculate({
-      period: this.params.period,
+    const lineA = SMA.calculate({
+      period: this.params.n1,
       values: this.data['close'].values,
     });
-    this.addIndicator('SMA', sma);
+    this.addIndicator('lineA', lineA);
+
+    const lineB = SMA.calculate({
+      period: this.params.n2,
+      values: this.data['close'].values,
+    });
+    this.addIndicator('lineB', lineB);
 
     const crossUp = CrossUp.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossUp', crossUp);
+    this.addSignal('crossUp', crossUp);
 
     const crossDown = CrossDown.calculate({
-      lineA: this.data['close'].values,
-      lineB: this.getIndicator('SMA'),
+      lineA: this.getIndicator('lineA'),
+      lineB: this.getIndicator('lineB'),
     });
-    this.addSignal('CrossDown', crossDown);
+    this.addSignal('crossDown', crossDown);
   }
 
   next(ctx) {
     const { index, signals } = ctx;
-    if (index === 0) this.buy({ size: 1000 });
-    if (index < 60) return;
-    if (signals.get('CrossDown')) this.sell({ size: 1000 });
-    if (signals.get('CrossUp')) this.buy({ size: 1000 });
+    if (index < this.params.n1 || index < this.params.n2) return;
+    if (signals.get('crossUp')) this.buy({ size: 1000 });
+    if (signals.get('crossDown')) this.sell({ size: 1000 });
   }
 }
 ```
@@ -228,7 +234,7 @@ class SmaStrategy extends Strategy {
 
 
 ```js
-const backtest = new Backtest(data, SmaStrategy, {
+const backtest = new Backtest(data, SmaCross, {
   cash: 1000000,
   tradeOnClose: true,
 });

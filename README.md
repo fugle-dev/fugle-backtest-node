@@ -70,7 +70,7 @@ class SmaCross extends Strategy {
 
 const data = require('./data.json');  // historical OHLCV data
 
-const backtest = new Backtest(data, TestStrategy, {
+const backtest = new Backtest(data, SmaCross, {
   cash: 1000000,
   tradeOnClose: true,
 });
@@ -184,7 +184,7 @@ You can implement your own trading strategy by inheriting the `Strategy` class a
 - `Strategy.init(data)`: This method is called before running the strategy. You can pre-calculate all indicators and signals that the strategy depends on.
 - `Strategy.next(context)`: This method will be iteratively called when running the strategy with the `Backtest` instance, and the `context` parameter represents the current candle and technical indicators and signals. You can decide whether to make buy or sell actions based on the current price, indicators, and signals.
 
-Here's an example of implementing a simple moving average (SMA) strategy. The strategy sets the SMA parameter period to 20 by default, and when the closing price of a stock or commodity crosses above the moving average, it buys 1 trading unit. Conversely, when the closing price crosses below the moving average, it sells 1 trading unit.
+Here's an example of implementing a simple average crossover strategy. The parameter `n1` represents the period of the short-term moving average, and `n2` represents the period of the long-term moving average. When the short-term moving average crosses above the long-term moving average, it buys `1000` trading unit. Conversely, when the short-term moving average crosses below the long-term moving average, the strategy sells `1000` trading unit.
 
 ```js
 import { Backtest, Strategy } from '@fugle/backtest';
@@ -233,7 +233,7 @@ class SmaCross extends Strategy {
 After preparing historical data and implementing the trading strategy, you can run the backtest. Calling the `Backtest.run()` method will execute the backtest and return a `Stats` instance, which includes the simulation results of our strategy and related statistical data.
 
 ```js
-const backtest = new Backtest(data, SmaStrategy, {
+const backtest = new Backtest(data, SmaCross, {
   cash: 1000000,
   tradeOnClose: true,
 });
