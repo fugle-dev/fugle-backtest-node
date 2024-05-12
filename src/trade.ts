@@ -199,7 +199,7 @@ export class Trade {
    * Copy the trade.
    */
   public copy(options: Partial<TradeOptions>) {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this.replace(options));
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this).replace(options);
   }
 
   private setContingent(type: string, price: number) {
