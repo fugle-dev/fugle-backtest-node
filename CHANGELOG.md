@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.0...v0.1.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* hanging backtest when using take profit or stop loss orders ([#4](https://github.com/fugle-dev/fugle-backtest-node/issues/4)) ([f144b37](https://github.com/fugle-dev/fugle-backtest-node/commit/f144b3787d218defcccd616b089a70bc4f7ed6e0))
+
 ## [0.1.0](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.0-beta.2...v0.1.0) (2024-05-12)
 
 
