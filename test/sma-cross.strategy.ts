@@ -33,7 +33,8 @@ export class SmaCross extends Strategy {
   next(ctx: Context) {
     const { index, signals } = ctx;
     if (index < this.params.n1 || index < this.params.n2) return;
-    if (signals.get('crossUp')) this.buy({ size: 1000 });
+    const price = ctx.data['close'];
+    if (signals.get('crossUp')) this.buy({ size: 1000, tpPrice: price * 1.15, slPrice: price * 0.9 });
     if (signals.get('crossDown')) this.sell({ size: 1000 });
   }
 }

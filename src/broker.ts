@@ -124,7 +124,7 @@ export class Broker {
     const prevClose = first(data['close'].values.slice(-2)) as number;
     let reprocessOrders = false;
 
-    for (let i = 0; i < this.orders.length; i = 0) {
+    for (let i = 0; i < this.orders.length; i++) {
       const order = this.orders[i];
 
       /* istanbul ignore if */
