@@ -1,6 +1,7 @@
 import { Trade } from '../trade';
 
 export interface OrderOptions {
+  price?: number;
   size: number;
   limitPrice?: number;
   stopPrice?: number;
