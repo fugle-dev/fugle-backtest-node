@@ -61,9 +61,9 @@ export class Broker {
   }
 
   public newOrder(options: OrderOptions) {
-    const { size, stopPrice, limitPrice, slPrice, tpPrice, parentTrade } = options;
+    const { price, size, stopPrice, limitPrice, slPrice, tpPrice, parentTrade } = options;
     const isLong = size > 0;
-    const adjustedPrice = this.adjustPrice({ size });
+    const adjustedPrice = this.adjustPrice({ price, size });
 
     if (isLong) {
       if (!((limitPrice || stopPrice || adjustedPrice) > (slPrice || Number.NEGATIVE_INFINITY) && (limitPrice || stopPrice || adjustedPrice) < (tpPrice || Number.POSITIVE_INFINITY))) {
@@ -232,8 +232,8 @@ export class Broker {
   }
 
   /**
-   * Long/short `price`, adjusted for commisions.
-   * In long positions, the adjusted price is a fraction higher, and vice versa.
+   * Long/short `price`, adjusted for commissions or user-defined trade execution price.
+   * In long positions, the commission-adjusted price for is a fraction higher, and vice versa.
    */
   private adjustPrice(options: { size: number, price?: number }) {
     const { size, price } = options;
