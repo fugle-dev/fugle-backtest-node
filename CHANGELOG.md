@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.1...v0.2.0) (2025-01-17)
+
+
+### Features
+
+* allow user-defined trade execution price ([#5](https://github.com/fugle-dev/fugle-backtest-node/issues/5)) ([912b873](https://github.com/fugle-dev/fugle-backtest-node/commit/912b873f5626d1403cbfe1549e54759a34e39cd6))
+
 ### [0.1.1](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.0...v0.1.1) (2025-01-15)
 
 
