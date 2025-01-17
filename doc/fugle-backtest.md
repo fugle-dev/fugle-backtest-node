@@ -135,6 +135,7 @@ Initialize the strategy to declare indicators and signals.
   - `stopPrice` {number} The stop price of the order.
   - `slPrice` {number} The stop-loss price of the order.
   - `tpPrice` {number} The take-profit price of the order.
+  - `price` {number} The price at which the trade is executed.
 
 Place a new long order.
 
@@ -146,6 +147,7 @@ Place a new long order.
   - `stopPrice` {number} The stop price of the order.
   - `slPrice` {number} The stop-loss price of the order.
   - `tpPrice` {number} The take-profit price of the order.
+  - `price` {number} The price at which the trade is executed.
 
 Place a new short order.
 
