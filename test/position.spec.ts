@@ -1,14 +1,16 @@
 import { sum, sumBy } from 'lodash';
-import { DataFrame } from 'danfojs-node';
 import { Broker } from '../src/broker';
 import { Position } from '../src/position';
 import { Trade } from '../src/trade';
+
+import DataFrame from '../src/ndframe/dataframe';
 
 describe('Position', () => {
   let data: DataFrame;
   let broker: Broker;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     data = new DataFrame(require('./fixtures/2330.json'));
     broker = new Broker(data, {
       cash: 10000,

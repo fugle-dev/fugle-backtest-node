@@ -1,7 +1,8 @@
 import * as assert from 'assert';
-import { DataFrame } from 'danfojs-node';
 import { Broker } from './broker';
 import { Context, OrderOptions } from './interfaces';
+
+import DataFrame from './ndframe/dataframe';
 
 export abstract class Strategy {
   private _indicators: Record<string, number[] | Record<string, number>[]> = {};
@@ -108,8 +109,10 @@ export abstract class Strategy {
    * Get the strategy name.
    */
   public toString() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (this.params && Object.keys(this.params).length) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const params = Object.entries(this.params)
         .map(([key, value]) => `${key}=${value}`);

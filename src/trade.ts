@@ -173,7 +173,7 @@ export class Trade {
   /**
    * Place new `Order` to close `portion` of the trade at next market price.
    */
-  public close(portion: number = 1) {
+  public close(portion = 1) {
     assert(portion > 0 && portion <= 1, 'portion must be a fraction between 0 and 1');
     const size = Math.max(1, Math.round(Math.abs(this._size) * portion)) * Math.sign(-this._size);
     const order = new Order(this.broker, { size, parentTrade: this, tag: this.tag });

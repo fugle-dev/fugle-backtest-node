@@ -1,10 +1,11 @@
 import * as assert from 'assert';
-import { DataFrame } from 'danfojs-node';
 import { last, first, sumBy, remove } from 'lodash';
 import { Order } from './order';
 import { Trade } from './trade';
 import { Position } from './position';
 import { BrokerOptions, OrderOptions } from './interfaces';
+
+import DataFrame from './ndframe/dataframe';
 
 export class Broker {
   private _i: number;
@@ -135,6 +136,7 @@ export class Broker {
         const isStopHit = order.isLong ? (high > stopPrice) : (low < stopPrice);
         /* istanbul ignore if */
         if (!isStopHit) continue;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         delete order._stopPrice;
       }

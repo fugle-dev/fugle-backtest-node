@@ -3,10 +3,12 @@ import { Stats } from '../src/stats';
 import { SmaCross } from './sma-cross.strategy';
 
 describe('Backtest', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const data = require('./fixtures/2330.json');
 
   describe('constructor()', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
@@ -32,6 +34,7 @@ describe('Backtest', () => {
 
     it('should throw error when Strategy is invalid', () => {
       expect(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         new Backtest(data, {});
       }).toThrow(TypeError);
@@ -45,6 +48,7 @@ describe('Backtest', () => {
 
     it('should throw error when some data fields are missing', () => {
       expect(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         new Backtest([{ date: '2023-01-03' }], SmaCross);
       }).toThrow(TypeError);
@@ -73,6 +77,7 @@ describe('Backtest', () => {
 
     it('should throw error when no parameters provided', async () => {
       const backtest = new Backtest(data, SmaCross);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await expect(() => backtest.optimize({})).rejects.toThrow();
     });

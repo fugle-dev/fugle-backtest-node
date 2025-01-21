@@ -1,4 +1,3 @@
-import { DataFrame, Series, toJSON } from 'danfojs-node';
 import { intersection, maxBy } from 'lodash';
 import { Strategy as BaseStrategy } from './strategy';
 import { Broker } from './broker';
@@ -6,6 +5,9 @@ import { Trade } from './trade';
 import { Stats } from './stats';
 import { HistoricalData, BacktestOptions, Context } from './interfaces';
 import { StatsIndex } from './enums';
+
+import DataFrame from './ndframe/dataframe';
+import Series from './ndframe/series';
 
 export class Backtest {
   private _data: DataFrame;
@@ -65,8 +67,7 @@ export class Backtest {
     });
     const strategy = new this.Strategy(data, broker);
 
-    // @ts-ignore
-    if (options?.params) strategy.params = options.params;
+    if (options?.params) (strategy as any).params = options.params;
 
     strategy.init();
 
@@ -161,7 +162,7 @@ export class Backtest {
 
       const data = {
         date: rows.index[0],
-        ...(toJSON(rows) as Record<string, number>[])[0],
+        ...(rows.toJSON() as Record<string, number>[])[0],
       };
 
       const indicators = new Map(
