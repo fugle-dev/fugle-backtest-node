@@ -60,20 +60,35 @@ export class Broker {
     return Math.max(0, this.equity - marginUsed);
   }
 
+  isGreaterWithPrecision(a: number, b: number, precision = 10) {
+    return (a - b) > -Math.pow(10, -precision);
+  }
+  isLessWithPrecision(a: number, b: number, precision = 10) {
+    return (b - a) > -Math.pow(10, -precision);
+  }
+
   public newOrder(options: OrderOptions) {
     const { price, size, stopPrice, limitPrice, slPrice, tpPrice, parentTrade } = options;
     const isLong = size > 0;
     const adjustedPrice = this.adjustPrice({ price, size });
 
     if (isLong) {
-      if (!((limitPrice || stopPrice || adjustedPrice) > (slPrice || Number.NEGATIVE_INFINITY) && (limitPrice || stopPrice || adjustedPrice) < (tpPrice || Number.POSITIVE_INFINITY))) {
-        throw new RangeError(`Long orders require: SL (${slPrice}) < LIMIT (${limitPrice || stopPrice || adjustedPrice}) < TP (${tpPrice})`);
+      const basePrice = limitPrice || stopPrice || adjustedPrice;
+      const slBoundary = slPrice || Number.NEGATIVE_INFINITY;
+      const tpBoundary = tpPrice || Number.POSITIVE_INFINITY;
+  
+      if (!(this.isGreaterWithPrecision(basePrice, slBoundary) && this.isLessWithPrecision(basePrice, tpBoundary))) {
+          throw new RangeError(`Long orders require: SL (${slPrice}) < LIMIT (${basePrice}) < TP (${tpPrice})`);
       }
-    } else {
-      if (!((limitPrice || stopPrice || adjustedPrice) > (tpPrice || Number.NEGATIVE_INFINITY) && (limitPrice || stopPrice || adjustedPrice) < (slPrice || Number.POSITIVE_INFINITY))) {
-        throw new RangeError(`Short orders require: TP (${tpPrice}) < LIMIT (${limitPrice || stopPrice || adjustedPrice}) < SL (${slPrice})`);
+  } else {
+      const basePrice = limitPrice || stopPrice || adjustedPrice;
+      const tpBoundary = tpPrice || Number.NEGATIVE_INFINITY;
+      const slBoundary = slPrice || Number.POSITIVE_INFINITY;
+  
+      if (!(this.isGreaterWithPrecision(basePrice, tpBoundary) && this.isLessWithPrecision(basePrice, slBoundary))) {
+          throw new RangeError(`Short orders require: TP (${tpPrice}) < LIMIT (${basePrice}) < SL (${slPrice})`);
       }
-    }
+  }
 
     const order = new Order(this, options);
 
