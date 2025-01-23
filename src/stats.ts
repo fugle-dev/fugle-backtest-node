@@ -147,10 +147,10 @@ export class Stats {
 
     const profitFactor = nTrades ? returns.apply(r => r > 0 ? r : null).sum() / (Math.abs(returns.apply(r => r < 0 ? r : null).sum())) : NaN;
     const expectancy = nTrades ? returns.mean() * 100 : NaN;
-    //const sqn = nTrades ? Math.sqrt(nTrades) * pl.mean() / pl.std() : NaN;
+    const sqn = nTrades ? Math.sqrt(nTrades) * pl.mean() / pl.std() : NaN;
 
     results.append(
-      [ profitFactor, expectancy, /*sqn*/ 3333 ],
+      [ profitFactor, expectancy, sqn ],
       [ StatsIndex.ProfitFactor, StatsIndex.Expectancy, StatsIndex.SQN ],
       { inplace: true },
     );

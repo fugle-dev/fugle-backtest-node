@@ -807,6 +807,24 @@ export default class Series extends NDframe {
   }
 
   /**
+   * Return sample standard deviation of elements in Series
+   * @example
+   * ```
+   * const sf = new Series([1, 2, 3, 4, 5, 6]);
+   * console.log(sf.std());
+   * //output 1.8708286933869707
+   * ```
+   */
+  std(): number {
+    const values = this.$checkAndCleanValues(this.values as ArrayType1D, "std")
+    const n = values.length;
+    const mean = values.reduce((a, b) => a + b) / n;
+    return Math.sqrt(
+      values.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / (n - 1),
+    );
+  }
+
+  /**
    * Return the sum of the values in a series.
    * @example
    * ```
