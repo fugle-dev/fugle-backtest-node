@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-beta.0](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.2.0...v1.0.0-beta.0) (2025-01-27)
+
+
+### Features
+
+* remove dependency on danfojs ([#7](https://github.com/fugle-dev/fugle-backtest-node/issues/7)) ([eff9c18](https://github.com/fugle-dev/fugle-backtest-node/commit/eff9c18cb6bd27f1973545dca34e8d668a464eec))
+
 ## [0.2.0](https://github.com/fugle-dev/fugle-backtest-node/compare/v0.1.1...v0.2.0) (2025-01-17)
 
 
