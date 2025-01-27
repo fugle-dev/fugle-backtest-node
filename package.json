@@ -32,7 +32,6 @@
   },
   "homepage": "https://github.com/fugle-dev/fugle-backtest-node#readme",
   "dependencies": {
-    "danfojs-node": "^1.1.2",
     "html-minifier": "^4.0.0",
     "lodash": "^4.17.21",
     "luxon": "^3.2.1",

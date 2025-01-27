@@ -1,10 +1,12 @@
-import { DataFrame, Series } from 'danfojs-node';
 import { Broker } from '../src/broker';
-import { Strategy } from '../src/strategy';
+import { Strategy } from '../src';
 import { Stats } from '../src/stats';
 import { Plotting } from '../src/plotting';
 import { Trade } from '../src/trade';
 import { SmaCross } from './sma-cross.strategy';
+
+import DataFrame from '../src/ndframe/dataframe';
+import Series from '../src/ndframe/series';
 
 describe('Stats', () => {
   let data: DataFrame;
@@ -14,7 +16,10 @@ describe('Stats', () => {
   let trades: Trade[];
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     data = new DataFrame(require('./fixtures/2330.json'));
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     data.setIndex({ index: data['date'].values, column: 'date', drop: true, inplace: true });
     strategy = new SmaCross(data, broker);
     broker = new Broker(data, {
@@ -54,7 +59,7 @@ describe('Stats', () => {
     it('should print the results', () => {
       const stats = new Stats(data, strategy, equity, trades, { riskFreeRate: 0 });
       stats.compute();
-      Series.prototype.print = jest.fn();;
+      Series.prototype.print = jest.fn();
       stats.print();
       expect(stats.results?.print).toBeCalled();
     });

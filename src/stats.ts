@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { DataFrame, Series } from 'danfojs-node';
+import Series from './ndframe/series';
 import { uniq, first, last } from 'lodash';
 import { DateTime } from 'luxon';
 import { StatsOptions } from './interfaces';
@@ -7,6 +7,8 @@ import { StatsIndex, EquityCurveColumn, TradeLogColumn } from './enums';
 import { Strategy } from './strategy';
 import { Trade } from './trade';
 import { Plotting } from './plotting';
+
+import DataFrame from './ndframe/dataframe';
 
 export class Stats {
   private _equityCurve?: DataFrame;
@@ -67,7 +69,9 @@ export class Stats {
     );
 
     const pl = tradeLog[TradeLogColumn.PnL] as Series;
+
     const returns = tradeLog[TradeLogColumn.ReturnPct] as Series;
+
     const durations = tradeLog[TradeLogColumn.Duration] as Series;
 
     const start = DateTime.fromISO(first(index) as string);
@@ -82,6 +86,7 @@ export class Stats {
     const equityFinal = this.equity.iat(index.length - 1) as number;
     const equityPeak = this.equity.max();
     const returnPct = this.computeReturnPct(this.equity);
+
     const buyAndHoldReturn = this.computeReturnPct(this.data['close']);
 
     results.append(
@@ -151,7 +156,7 @@ export class Stats {
     );
 
     results.apply(v => (typeof v === 'number') ? this.foramt(v) : v, { inplace: true });
-    results.config.setMaxRow(results.index.length);
+    results.setMaxRow(results.index.length);
 
     this._equityCurve = equityCurve;
     this._tradeLog = tradeLog;
@@ -199,16 +204,19 @@ export class Stats {
   }
 
   private computeDrawdownDurationPeaks(drawdown: Series) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const iloc = uniq([ ...drawdown.eq(0).values.reduce((arr, v, i) => v ? [ ...arr, i ] : arr, []), drawdown.index.length - 1]);
-    const prev = [ NaN, ...iloc.slice(0, -1) ];
-    const df = new DataFrame({ iloc, prev });
+    const ilocs = uniq([ ...drawdown.eq(0).values.reduce((arr, v, i) => v ? [ ...arr, i ] : arr, []), drawdown.index.length - 1]);
+    const prev = [ NaN, ...ilocs.slice(0, -1) ];
+    const df = new DataFrame({ ilocs, prev });
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    df.query(df['iloc'].gt(df['prev'].add(1)), { inplace: true });
+    df.query(df['ilocs'].gt(df['prev'].add(1)), { inplace: true });
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    df.setIndex({ index: df['iloc'].values.map(i => drawdown.index[i]), inplace: true })
+    df.setIndex({ index: df['ilocs'].values.map(i => drawdown.index[i]), inplace: true })
 
     if (!df.size) {
       const nan = new Series(Array(drawdown.count()).fill(NaN))
@@ -222,9 +230,10 @@ export class Stats {
       return end.diff(start, 'days').get('days');
     }), { inplace: true });
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    df.addColumn('peaks', df.apply(([iloc, prev, duration]) =>
-      drawdown.iloc(Array.from({ length: (iloc - prev) + 1 }, (v, k) => k + prev)).max(), { axis: 1 },
+    df.addColumn('peaks', df.apply(([ilocs, prev, duration]) =>
+      drawdown.iloc(Array.from({ length: (ilocs - prev) + 1 }, (v, k) => k + prev)).max(), { axis: 1 },
     ), { inplace: true });
 
     const ddDur = new Series(drawdown.index.map(i => df.index.includes(i) ? df.at(i, 'duration') : NaN));

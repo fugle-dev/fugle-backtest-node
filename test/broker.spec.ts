@@ -1,13 +1,15 @@
-import { DataFrame } from 'danfojs-node';
 import { sumBy } from 'lodash';
 import { Broker } from '../src/broker';
 import { Order } from '../src/order';
 import { Trade } from '../src/trade';
 
+import DataFrame from '../src/ndframe/dataframe';
+
 describe('Broker', () => {
   let data: DataFrame;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     data = new DataFrame(require('./fixtures/2330.json'));
     data.setIndex({ index: data['date'].values, column: 'date', drop: true, inplace: true });
   });

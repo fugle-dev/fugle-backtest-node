@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as assert from 'assert';
 import * as open from 'open';
-import { DataFrame, toJSON } from 'danfojs-node';
 import { minify } from 'html-minifier';
 import { Stats } from './stats';
-import { PlottingOptions } from './interfaces'
+import { PlottingOptions } from './interfaces';
+
+import DataFrame from './ndframe/dataframe';
 
 export class Plotting {
   private readonly openBrowser: boolean;
@@ -37,8 +38,8 @@ export class Plotting {
     assert(this.stats.tradeLog);
 
     const df = this.stats.equityCurve.addColumn('Date', this.stats.equityCurve.index) as DataFrame;
-    const equityCurve = JSON.stringify(toJSON(df));
-    const tradesTable = JSON.stringify(toJSON(this.stats.tradeLog as DataFrame));
+    const equityCurve = JSON.stringify(df.toJSON());
+    const tradesTable = JSON.stringify(this.stats.tradeLog.toJSON() as DataFrame);
 
     return `
       <!DOCTYPE html>

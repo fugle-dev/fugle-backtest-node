@@ -1,4 +1,4 @@
-import { DataFrame } from 'danfojs-node';
+import DataFrame from '../ndframe/dataframe';
 
 export interface Context {
   index: number;
