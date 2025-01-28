@@ -5,4 +5,6 @@ export interface BacktestOptions {
   tradeOnClose?: boolean;
   hedging?: boolean;
   exclusiveOrders?: boolean;
+  outputFile?: string;
+  openBrowser?: boolean;
 }
