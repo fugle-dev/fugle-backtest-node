@@ -13,7 +13,7 @@ export class Plotting {
 
   constructor(private readonly stats: Stats, private readonly options?: PlottingOptions) {
     this.openBrowser = options?.openBrowser ?? true;
-    this.filename = options?.filename ?? 'output.html';
+    this.filename = options?.filename?.toLowerCase() ?? 'output.html';
   }
 
   public plot() {
@@ -26,7 +26,7 @@ export class Plotting {
       removeOptionalTags: true,
       minifyJS: true
     });
-    const outputFile = `./${this.filename}`;
+    const outputFile = this.filename.endsWith('.html') ? `./${this.filename}` : `./${this.filename}.html`;
     fs.writeFileSync(outputFile, html);
 
     if (this.openBrowser) open(outputFile);

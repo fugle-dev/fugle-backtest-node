@@ -176,7 +176,7 @@ export class Stats {
     if (!this.results) {
       throw new Error('No stats results');
     }
-    new Plotting(this).plot();
+    new Plotting(this, { openBrowser: this.options.openBrowser, filename: this.options.filename }).plot();
   }
 
   private computeExposureTime(index: string[], tradeLog: DataFrame) {
@@ -267,6 +267,7 @@ export class Stats {
   private computeGeometricMean(returns: Series) {
     returns = returns.fillNa(0).add(1) as Series;
     /* istanbul ignore next */
+    // @ts-ignore
     if (returns.values.some(v => v <= 0)) return 0;
     /* istanbul ignore next */
     return Math.exp(returns.apply(v => Math.log(v)).sum() / (returns.values.length || 0)) - 1;

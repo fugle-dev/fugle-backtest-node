@@ -63,6 +63,8 @@ export class Backtest {
       tradeOnClose: false,
       hedging: false,
       exclusiveOrders: false,
+      outputFile: '',
+      openBrowser: true,
       ...this.options,
     });
     const strategy = new this.Strategy(data, broker);
@@ -85,7 +87,7 @@ export class Backtest {
       strategy,
       new Series(broker.equities),
       broker.closedTrades as Trade[],
-      { riskFreeRate: 0 },
+      { riskFreeRate: 0, filename: this.options?.outputFile, openBrowser: this.options?.openBrowser },
     ).compute();
 
     this._stats = stats;
