@@ -73,19 +73,19 @@ describe('Stats', () => {
   });
 
   describe('.plot()', () => {
-    it('should plot the equity curve', () => {
-      const stats = new Stats(data, strategy, equity, trades, { riskFreeRate: 0 });
+    it('should plot the equity curve', async () => {
+      const stats = new Stats(data, strategy, equity, trades, {riskFreeRate: 0});
       stats.compute();
       Plotting.prototype.plot = jest.fn();
-      stats.plot();
+      await stats.plot();
       expect(Plotting.prototype.plot).toBeCalled();
     });
 
-    it('should throw error when missing results', () => {
-      expect(() => {
-        const stats = new Stats(data, strategy, equity, trades, { riskFreeRate: 0 });
-        stats.plot();
-      }).toThrow(Error);
+    it('should throw error when missing results', async () => {
+      await expect(async () => {
+        const stats = new Stats(data, strategy, equity, trades, {riskFreeRate: 0});
+        await stats.plot();
+      }).rejects.toThrow(Error);
     });
   });
 });

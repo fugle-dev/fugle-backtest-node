@@ -172,11 +172,18 @@ export class Stats {
     this.results.print();
   }
 
-  public plot() {
+  public async plot() {
     if (!this.results) {
       throw new Error('No stats results');
     }
-    new Plotting(this, { openBrowser: this.options.openBrowser, filename: this.options.filename }).plot();
+    await new Plotting(this, { openBrowser: this.options.openBrowser, filename: this.options.filename }).plot();
+  }
+
+  public async toHTML() {
+    if (!this.results) {
+      throw new Error('No stats results');
+    }
+    return await new Plotting(this).getHTML();
   }
 
   private computeExposureTime(index: string[], tradeLog: DataFrame) {

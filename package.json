@@ -1,6 +1,6 @@
 {
   "name": "@fugle/backtest",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.0",
   "description": "Backtest trading strategies in Node.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/fugle-dev/fugle-backtest-node#readme",
   "dependencies": {
-    "html-minifier": "^4.0.0",
+    "html-minifier-terser": "^7.2.0",
     "lodash": "^4.17.21",
     "luxon": "^3.2.1",
     "open": "^8.4.1"
@@ -41,6 +41,7 @@
     "@commitlint/cli": "^16.2.1",
     "@commitlint/config-conventional": "^16.2.1",
     "@types/html-minifier": "^4.0.2",
+    "@types/html-minifier-terser": "^7.0.2",
     "@types/jest": "^27.0.1",
     "@types/lodash": "^4.14.191",
     "@types/luxon": "^3.2.0",

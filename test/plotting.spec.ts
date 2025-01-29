@@ -1,5 +1,5 @@
 import * as open from 'open';
-import { minify } from 'html-minifier';
+import { minify } from 'html-minifier-terser';
 import { Plotting } from '../src/plotting';
 import { Backtest } from '../src/backtest';
 import { Stats } from '../src/stats';
@@ -7,7 +7,7 @@ import { SmaCross } from './sma-cross.strategy';
 
 jest.mock('fs');
 jest.mock('open');
-jest.mock('html-minifier');
+jest.mock('html-minifier-terser');
 
 describe('Plotting', () => {
   let backtest: Backtest;
@@ -47,18 +47,18 @@ describe('Plotting', () => {
   });
 
   describe('.plot()', () => {
-    it('should create the HTML file with minified content', () => {
-      const options = { openBrowser: false, filename: 'test.html' };
+    it('should create the HTML file with minified content', async () => {
+      const options = {openBrowser: false, filename: 'test.html'};
       const plotting = new Plotting(stats, options);
-      plotting.plot();
+      await plotting.plot();
       expect(minify).toHaveBeenCalled();
       expect(open).not.toBeCalled();
     });
 
-    it('should create the HTML file with minified content and open it in the browser', () => {
-      const options = { openBrowser: true, filename: 'test.html' };
+    it('should create the HTML file with minified content and open it in the browser', async () => {
+      const options = {openBrowser: true, filename: 'test.html'};
       const plotting = new Plotting(stats, options);
-      plotting.plot();
+      await plotting.plot();
       expect(minify).toHaveBeenCalled();
       expect(open).toHaveBeenCalledWith(`./${options.filename}`);
     });

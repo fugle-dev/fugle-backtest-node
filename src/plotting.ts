@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as assert from 'assert';
 import * as open from 'open';
-import { minify } from 'html-minifier';
+import { minify } from 'html-minifier-terser';
 import { Stats } from './stats';
 import { PlottingOptions } from './interfaces';
 
@@ -16,17 +16,14 @@ export class Plotting {
     this.filename = options?.filename?.toLowerCase() ?? 'output.html';
   }
 
-  public plot() {
-    const html = minify(this.createHTML(), {
-      collapseWhitespace: true,
-      removeComments: true,
-      collapseBooleanAttributes: true,
-      useShortDoctype: true,
-      removeEmptyAttributes: true,
-      removeOptionalTags: true,
-      minifyJS: true
-    });
-    const outputFile = this.filename.endsWith('.html') ? `./${this.filename}` : `./${this.filename}.html`;
+  public async getHTML() {
+    return await minify(this.createHTML());
+  }
+
+  public async plot() {
+    const html = await minify(this.createHTML());
+    let outputFile = this.filename.startsWith('/') || this.filename.startsWith('./') ? this.filename : `./${this.filename}`;
+    if (! outputFile.endsWith('.html')) outputFile = outputFile + '.html';
     fs.writeFileSync(outputFile, html);
 
     if (this.openBrowser) open(outputFile);
